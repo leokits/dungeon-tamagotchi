@@ -1,5 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import {
+  getSpawnCandidates,
+  pickWeightedSpawn,
+  MONSTER_DEF_BY_ID,
+  defaultBehaviorStats,
+  type SoilType,
+} from "@/game/monsters";
+
+// Soil-type → resource mapping based on tile properties
+function determineSoilResource(nutrient: number, mana: number): string {
+  if (mana > 0.5) return Math.random() < 0.5 ? "crystal_shard" : "mana_orb";
+  if (nutrient > 0.5) return Math.random() < 0.6 ? "mushroom" : "moss";
+  return Math.random() < 0.5 ? "bone" : "moss";
+}
+
+function getSoilType(nutrient: number, mana: number): SoilType {
+  if (mana >= 2.0) return "crystal";
+  if (nutrient >= 0.6) return "green";
+  return "brown";
+}
+
+// Base spawn chance per matching neighbor tile (out of 8 possible)
+const SPAWN_CHANCE_PER_NEIGHBOR = 0.05; // 5% per matching neighbor → max ~40%
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -71,14 +94,8 @@ export async function POST(request: NextRequest) {
   }
 
   // Check adjacency — at least one neighbor must be walkable
-  const neighbors = [
-    { x: local_x - 1, y: local_y, cx: chunk_x, cy: chunk_y },
-    { x: local_x + 1, y: local_y, cx: chunk_x, cy: chunk_y },
-    { x: local_x, y: local_y - 1, cx: chunk_x, cy: chunk_y },
-    { x: local_x, y: local_y + 1, cx: chunk_x, cy: chunk_y },
-  ];
-
-  // Get the chunk dimensions to handle edge wrapping
+  // Supports cross-chunk boundaries: when local coord goes out of bounds,
+  // look in the adjacent chunk.
   const { data: chunk } = await supabase
     .from("chunks")
     .select("width, height")
@@ -91,16 +108,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Chunk not found" }, { status: 404 });
   }
 
-  // Normalize neighbor coordinates (handle chunk boundaries)
-  const normalizedNeighbors = neighbors.filter(
-    (n) => n.x >= 0 && n.x < chunk.width && n.y >= 0 && n.y < chunk.height
-  );
+  const rawNeighbors = [
+    { x: local_x - 1, y: local_y, cx: chunk_x, cy: chunk_y },
+    { x: local_x + 1, y: local_y, cx: chunk_x, cy: chunk_y },
+    { x: local_x, y: local_y - 1, cx: chunk_x, cy: chunk_y },
+    { x: local_x, y: local_y + 1, cx: chunk_x, cy: chunk_y },
+  ];
 
-  // Check if any neighbor is walkable
-  const walkableTypes = ["corridor", "packed", "crystal", "hatchery"];
+  // Resolve cross-chunk boundaries
+  const resolvedNeighbors = rawNeighbors.map((n) => {
+    let { x, y, cx, cy } = n;
+    if (x < 0) { cx -= 1; x = chunk.width - 1; }    // wrap to left chunk
+    else if (x >= chunk.width) { cx += 1; x = 0; }   // wrap to right chunk
+    if (y < 0) { cy -= 1; y = chunk.height - 1; }    // wrap to top chunk
+    else if (y >= chunk.height) { cy += 1; y = 0; }   // wrap to bottom chunk
+    return { x, y, cx, cy };
+  });
+
+  // Check if any neighbor is walkable (including ground — can dig next to ground entrance)
+  const walkableTypes = ["corridor", "packed", "crystal", "hatchery", "ground"];
   let hasWalkableNeighbor = false;
 
-  for (const n of normalizedNeighbors) {
+  for (const n of resolvedNeighbors) {
     const { data: neighborTile } = await supabase
       .from("tiles")
       .select("type")
@@ -145,8 +174,139 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Remove any resource that was on this tile
-  await supabase.from("resources").delete().eq("tile_id", targetTile.id);
+  // --- Resource drop: determined by soil properties ---
+  const revealRoll = Math.random();
+  let revealedResource = null;
+  if (revealRoll < 0.35) {
+    const resourceType = determineSoilResource(targetTile.nutrient, targetTile.mana);
 
-  return NextResponse.json({ tile: updatedTile });
+    const { data: newResource } = await supabase
+      .from("resources")
+      .insert({
+        tile_id: targetTile.id,
+        dungeon_id: dungeon.id,
+        type: resourceType,
+        quantity: 1,
+      })
+      .select()
+      .single();
+
+    revealedResource = newResource;
+  }
+
+  // --- Monster spawn: use bestiary-based soil spawning ---
+  let spawnedPet = null;
+
+  // Determine soil type of the dug tile
+  const tileSoil = getSoilType(targetTile.nutrient, targetTile.mana);
+  const candidates = getSpawnCandidates(
+    tileSoil,
+    targetTile.nutrient,
+    targetTile.mana
+  );
+
+  if (candidates.length > 0) {
+    // Count nearby walkable tiles to determine spawn chance
+    const allNeighborOffsets = [
+      { dx: -1, dy: -1 }, { dx: 0, dy: -1 }, { dx: 1, dy: -1 },
+      { dx: -1, dy: 0 },                      { dx: 1, dy: 0 },
+      { dx: -1, dy: 1 },  { dx: 0, dy: 1 },  { dx: 1, dy: 1 },
+    ];
+
+    const neighborCoords = allNeighborOffsets.map((off) => {
+      let nx = local_x + off.dx;
+      let ny = local_y + off.dy;
+      let ncx = chunk_x;
+      let ncy = chunk_y;
+      if (nx < 0) { ncx -= 1; nx = chunk.width - 1; }
+      else if (nx >= chunk.width) { ncx += 1; nx = 0; }
+      if (ny < 0) { ncy -= 1; ny = chunk.height - 1; }
+      else if (ny >= chunk.height) { ncy += 1; ny = 0; }
+      return { x: nx, y: ny, cx: ncx, cy: ncy };
+    });
+
+    const walkableForSpawn = ["corridor", "packed", "ground"];
+    let matchingNeighbors = 0;
+
+    for (const nc of neighborCoords) {
+      const { data: nTile } = await supabase
+        .from("tiles")
+        .select("id, type, nutrient, mana")
+        .eq("dungeon_id", dungeon.id)
+        .eq("chunk_x", nc.cx)
+        .eq("chunk_y", nc.cy)
+        .eq("local_x", nc.x)
+        .eq("local_y", nc.y)
+        .single();
+
+      if (!nTile || !walkableForSpawn.includes(nTile.type)) continue;
+
+      // Check if neighbor has resources that boost spawn
+      const { data: nResource } = await supabase
+        .from("resources")
+        .select("type")
+        .eq("tile_id", nTile.id)
+        .single();
+
+      const neighborSoil = getSoilType(nTile.nutrient, nTile.mana);
+      if (neighborSoil === tileSoil) {
+        matchingNeighbors += 1;
+      } else {
+        matchingNeighbors += 0.3; // partial credit for different soil
+      }
+
+      // Bonus for resources that match candidate boost resources
+      if (nResource) {
+        const anyBoost = candidates.some(
+          (c) => c.spawnCondition.boostResources.includes(nResource.type)
+        );
+        if (anyBoost) matchingNeighbors += 0.5;
+      }
+    }
+
+    const spawnChance = matchingNeighbors * SPAWN_CHANCE_PER_NEIGHBOR;
+    if (Math.random() < spawnChance) {
+      const chosenId = pickWeightedSpawn(candidates);
+      if (chosenId) {
+        const baseDef = MONSTER_DEF_BY_ID[chosenId];
+        const stats = baseDef?.baseStats ?? { hp: 40, mp: 10, atk: 8, def: 8, spd: 8 };
+
+        const { data: newPet } = await supabase
+          .from("pets")
+          .insert({
+            player_id: player.id,
+            dungeon_id: dungeon.id,
+            base_type: chosenId,
+            evolution_stage: 1,
+            status: "alive",
+            hp: stats.hp,
+            max_hp: stats.hp,
+            mp: stats.mp,
+            max_mp: stats.mp,
+            atk: stats.atk,
+            def: stats.def,
+            spd: stats.spd,
+            hunger: 1.0,
+            tile_x: local_x,
+            tile_y: local_y,
+            chunk_x: chunk_x,
+            chunk_y: chunk_y,
+            level: 1,
+            total_exp: 0,
+            species: chosenId,
+            behavior_stats: defaultBehaviorStats(),
+          })
+          .select()
+          .single();
+
+        spawnedPet = newPet;
+      }
+    }
+  }
+
+  return NextResponse.json({
+    tile: updatedTile,
+    resource: revealedResource,
+    pet: spawnedPet,
+  });
 }

@@ -7,7 +7,8 @@ export type TileType =
   | "solid_regrowing"
   | "resource"
   | "hatchery"
-  | "crystal";
+  | "crystal"
+  | "ground";
 
 export type ResourceType =
   | "mushroom"
@@ -18,7 +19,21 @@ export type ResourceType =
 
 export type PetStatus = "alive" | "raiding" | "dead" | "captured";
 
-export type PetBaseType = "shroom_slime" | "crystal_sprite" | "stone_crawler";
+export type PetBaseType =
+  | "shroom_slime"
+  | "crystal_sprite"
+  | "stone_crawler"
+  | "glob_slime"
+  | "dust_mite"
+  | "cave_beetle"
+  | "mycelid"
+  | "wisp"
+  | "cave_serpent"
+  | "stone_golem"
+  | "shade_wraith"
+  | "fang_beetle"
+  | "moss_crawler"
+  | "ember_salamander";
 
 export type RaidResult = "attacker_win" | "defender_win" | "draw" | "timeout";
 
@@ -53,6 +68,7 @@ export interface Chunk {
   chunk_y: number;
   width: number;
   height: number;
+  locked: boolean;
   created_at: string;
 }
 
@@ -105,11 +121,25 @@ export interface Pet {
   chunk_y: number;
   food_log: string[];
   skills: string[];
+  level: number;
+  total_exp: number;
+  behavior_stats: PetBehaviorStats;
+  species: string;
   died_at: string | null;
   death_location_x: number | null;
   death_location_y: number | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface PetBehaviorStats {
+  tilesWalked: number;
+  fightsWon: number;
+  fightsLost: number;
+  totalExp: number;
+  foodEaten: Record<string, number>;
+  preysHunted: Record<string, number>;
+  specialFlags: string[];
 }
 
 export interface Egg {
@@ -139,6 +169,19 @@ export interface Raid {
   replay_data: Record<string, unknown> | null;
   created_at: string;
   completed_at: string | null;
+}
+
+export interface CombatLog {
+  id: string;
+  dungeon_id: string;
+  attacker_id: string;
+  defender_id: string;
+  winner_id: string | null;
+  attacker_damage: number;
+  defender_damage: number;
+  exp_gained: number;
+  rounds: number;
+  created_at: string;
 }
 
 export interface Notification {

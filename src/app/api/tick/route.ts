@@ -70,8 +70,20 @@ async function processPlayer(
   const elapsed = now.getTime() - lastTick.getTime();
   const missedTicks = Math.max(1, Math.floor(elapsed / TICK_INTERVAL_MS));
 
-  // 1. Chrono Dust accrual
-  const newDust = player.chrono_dust + missedTicks;
+  // 1. Chrono Dust accrual — rate scales with crystal energy
+  // At 100% crystal: +1 dust/tick. At 50%: +0.5/tick. At 0%: +0.1/tick (minimum)
+  // We need dungeon first to get crystal energy, but we update dust here using
+  // a preliminary fetch. Dust is floored to integer.
+  const { data: dungeonForDust } = await supabase
+    .from("dungeons")
+    .select("crystal_energy")
+    .eq("player_id", player.id)
+    .single();
+
+  const crystalEnergyPct = (dungeonForDust?.crystal_energy ?? 100) / 100;
+  const dustRate = Math.max(0.1, crystalEnergyPct); // min 0.1 dust/tick
+  const dustGained = Math.floor(dustRate * missedTicks);
+  const newDust = player.chrono_dust + Math.max(1, dustGained);
 
   await supabase
     .from("players")
