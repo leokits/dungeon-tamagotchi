@@ -4,6 +4,7 @@ import {
   getSpawnCandidates,
   pickWeightedSpawn,
   MONSTER_DEF_BY_ID,
+  MONSTER_FAMILIES,
   defaultBehaviorStats,
   type SoilType,
 } from "@/game/monsters";
@@ -258,7 +259,10 @@ export async function POST(request: NextRequest) {
       // Bonus for resources that match candidate boost resources
       if (nResource) {
         const anyBoost = candidates.some(
-          (c) => c.spawnCondition.boostResources.includes(nResource.type)
+          (c) => {
+            const family = MONSTER_FAMILIES.find((f) => f.baseId === c.id);
+            return family?.spawnCondition.boostResources.includes(nResource.type) ?? false;
+          }
         );
         if (anyBoost) matchingNeighbors += 0.5;
       }

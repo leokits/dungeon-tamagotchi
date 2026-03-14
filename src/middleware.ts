@@ -48,6 +48,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // If logged in and visiting dev-login, redirect to dashboard
+  if (user && request.nextUrl.pathname === "/dev-login") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
   return supabaseResponse;
 }
 

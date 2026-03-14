@@ -70,7 +70,59 @@ function resolveSpecies(pet: Pet): string {
   return LEGACY_SPECIES_MAP[raw] || raw;
 }
 
-type Tool = "dig" | "view" | "crystal_move";
+type Tool = "dig" | "view" | "crystal_move" | "hatchery";
+
+interface BrowseDungeon {
+  player_id: string;
+  username: string;
+  dungeon_id: string;
+  crystal_energy: number;
+  pet_count: number;
+  last_active: string;
+}
+
+interface RaidHistoryEntry {
+  id: string;
+  role: "attacker" | "defender";
+  opponent_username: string;
+  result: string | null;
+  depth_reached: number | null;
+  loot?: { resources: Record<string, number> } | null;
+  energy_drained: number | null;
+  created_at: string;
+}
+
+interface LastRaidResult {
+  result: string;
+  depth_reached: number;
+  loot: { resources: Record<string, number> };
+  dead_pets: string[];
+  surviving_pets: string[];
+  energy_drained: number;
+}
+
+interface GameNotification {
+  id: string;
+  type: string;
+  data: Record<string, unknown>;
+  seen: boolean;
+  created_at: string;
+}
+
+interface TileInfo {
+  tile: Tile;
+  resource: Resource | null;
+  x: number; // screen x
+  y: number; // screen y
+}
+
+interface HatcheryPanel {
+  tileId: string;
+  chunkX: number;
+  chunkY: number;
+  localX: number;
+  localY: number;
+}
 
 interface GameViewProps {
   playerId: string;
@@ -89,6 +141,27 @@ export default function GameView({ playerId }: GameViewProps) {
   const [chunks, setChunks] = useState<Chunk[]>([]);
   const [areaCost, setAreaCost] = useState(50);
   const [selectedPetId, setSelectedPetId] = useState<string | null>(null);
+  const [tileInfo, setTileInfo] = useState<TileInfo | null>(null);
+  const [hatcheryPanel, setHatcheryPanel] = useState<HatcheryPanel | null>(null);
+  const [editingPetName, setEditingPetName] = useState<string | null>(null);
+  const [petNameInput, setPetNameInput] = useState("");
+
+  // Raid / dungeon browser state
+  const [showRaidPanel, setShowRaidPanel] = useState(false);
+  const [raidTab, setRaidTab] = useState<"browse" | "history">("browse");
+  const [browseDungeons, setBrowseDungeons] = useState<BrowseDungeon[]>([]);
+  const [browsLoading, setBrowseLoading] = useState(false);
+  const [raidHistory, setRaidHistory] = useState<RaidHistoryEntry[]>([]);
+  const [raidHistoryLoading, setRaidHistoryLoading] = useState(false);
+  const [selectedTarget, setSelectedTarget] = useState<BrowseDungeon | null>(null);
+  const [selectedRaidPets, setSelectedRaidPets] = useState<string[]>([]);
+  const [raidLaunching, setRaidLaunching] = useState(false);
+  const [lastRaidResult, setLastRaidResult] = useState<LastRaidResult | null>(null);
+
+  // Notification state
+  const [notifications, setNotifications] = useState<GameNotification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Admin menu state
   const [showAdmin, setShowAdmin] = useState(false);
@@ -98,10 +171,12 @@ export default function GameView({ playerId }: GameViewProps) {
   const [crystalGrowthRate, setCrystalGrowthRate] = useState(1.7);
   const [petMoveChance, setPetMoveChance] = useState(1);
   const [regrowthSpeed, setRegrowthSpeed] = useState(1);
+  const [hatchSpeedMultiplier, setHatchSpeedMultiplier] = useState(1);
   const [animSpeed, setAnimSpeed] = useState(1000); // ms per frame toggle
   const [tickCount, setTickCount] = useState(0);
   const [lastTickResult, setLastTickResult] = useState<string | null>(null);
 
+  const [cameraInitialized, setCameraInitialized] = useState(false);
   // Camera state
   const cameraRef = useRef({ x: 0, y: 0, zoom: 1 });
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -126,8 +201,27 @@ export default function GameView({ playerId }: GameViewProps) {
     setTiles(data.tiles);
     setResources(data.resources);
     setPlayer(data.player);
-    setChunks(data.chunks || []);
+    const fetchedChunks: Chunk[] = data.chunks || [];
+    setChunks(fetchedChunks);
     setLoading(false);
+
+    // Initialize camera to center on the starting (unlocked) chunk — only once
+    setCameraInitialized((prev) => {
+      if (!prev && fetchedChunks.length > 0) {
+        const startChunk = fetchedChunks.find((c) => !c.locked);
+        if (startChunk) {
+          const CHUNK_W = 20;
+          const CHUNK_H = 15;
+          cameraRef.current = {
+            x: startChunk.chunk_x * CHUNK_W * TILE_SIZE + (CHUNK_W / 2) * TILE_SIZE,
+            y: startChunk.chunk_y * CHUNK_H * TILE_SIZE + (CHUNK_H / 2) * TILE_SIZE,
+            zoom: 1.5,
+          };
+        }
+        return true;
+      }
+      return prev;
+    });
   }, []);
 
   const loadPets = useCallback(async () => {
@@ -137,10 +231,40 @@ export default function GameView({ playerId }: GameViewProps) {
     setPets(data.pets ?? []);
   }, []);
 
+  const loadBrowse = useCallback(async () => {
+    setBrowseLoading(true);
+    const res = await fetch("/api/dungeon/browse");
+    if (res.ok) {
+      const data = await res.json();
+      setBrowseDungeons(data.dungeons ?? []);
+    }
+    setBrowseLoading(false);
+  }, []);
+
+  const loadRaidHistory = useCallback(async () => {
+    setRaidHistoryLoading(true);
+    const res = await fetch("/api/raid/history");
+    if (res.ok) {
+      const data = await res.json();
+      setRaidHistory(data.raids ?? []);
+    }
+    setRaidHistoryLoading(false);
+  }, []);
+
+  const loadNotifications = useCallback(async () => {
+    const res = await fetch("/api/notifications");
+    if (res.ok) {
+      const data = await res.json();
+      setNotifications(data.notifications ?? []);
+      setUnreadCount(data.unread_count ?? 0);
+    }
+  }, []);
+
   useEffect(() => {
     loadDungeon();
     loadPets();
-  }, [loadDungeon, loadPets]);
+    loadNotifications();
+  }, [loadDungeon, loadPets, loadNotifications]);
 
   // Supabase Realtime subscription
   useEffect(() => {
@@ -248,6 +372,7 @@ export default function GameView({ playerId }: GameViewProps) {
           crystalGrowthRate,
           petMoveChance,
           regrowthSpeed,
+          hatchSpeedMultiplier,
         }),
       });
       const data = await res.json();
@@ -263,7 +388,7 @@ export default function GameView({ playerId }: GameViewProps) {
     } catch {
       // silent fail for dev tick
     }
-  }, [dustMultiplier, crystalGrowthRate, petMoveChance, regrowthSpeed, loadDungeon, loadPets]);
+  }, [dustMultiplier, crystalGrowthRate, petMoveChance, regrowthSpeed, hatchSpeedMultiplier, loadDungeon, loadPets]);
 
   useEffect(() => {
     if (!autoTick || tickInterval <= 0) return;
@@ -768,6 +893,19 @@ export default function GameView({ playerId }: GameViewProps) {
       handleDig(chunkX, chunkY, localX, localY);
     } else if (tool === "crystal_move") {
       handleMoveCrystal(chunkX, chunkY, localX, localY);
+    } else if (tool === "view") {
+      // Show tile info popup
+      const clickedTile = tiles.find(
+        (t) => t.chunk_x === chunkX && t.chunk_y === chunkY && t.local_x === localX && t.local_y === localY
+      );
+      if (clickedTile) {
+        const tileResource = resources.find((r) => r.tile_id === clickedTile.id) || null;
+        setTileInfo({ tile: clickedTile, resource: tileResource, x: e.clientX, y: e.clientY });
+      } else {
+        setTileInfo(null);
+      }
+    } else if (tool === "hatchery") {
+      handlePlaceHatchery(chunkX, chunkY, localX, localY);
     }
   }
 
@@ -857,9 +995,127 @@ export default function GameView({ playerId }: GameViewProps) {
     }
   }
 
+  async function handlePlaceHatchery(chunkX: number, chunkY: number, localX: number, localY: number) {
+    const clickedTile = tiles.find(
+      (t) => t.chunk_x === chunkX && t.chunk_y === chunkY && t.local_x === localX && t.local_y === localY
+    );
+
+    if (!clickedTile) {
+      showStatus("No tile found here");
+      return;
+    }
+
+    if (clickedTile.type === "hatchery") {
+      // Open egg incubation panel for this hatchery
+      setHatcheryPanel({ tileId: clickedTile.id, chunkX, chunkY, localX, localY });
+      return;
+    }
+
+    if (clickedTile.type !== "corridor" && clickedTile.type !== "packed") {
+      showStatus("Can only place hatchery on corridor or packed tiles");
+      return;
+    }
+
+    const res = await fetch("/api/dungeon/place-hatchery", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chunk_x: chunkX, chunk_y: chunkY, local_x: localX, local_y: localY }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      setTiles((prev) => prev.map((t) => (t.id === data.tile.id ? data.tile : t)));
+      showStatus("Hatchery placed! Click it again to incubate an egg.");
+    } else {
+      showStatus(data.error || "Failed to place hatchery");
+    }
+  }
+
+  async function handleIncubateEgg(baseType: string) {
+    if (!hatcheryPanel) return;
+
+    const res = await fetch("/api/egg/incubate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ base_type: baseType, hatchery_tile_id: hatcheryPanel.tileId }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      setHatcheryPanel(null);
+      showStatus("Egg incubating! Hatches in ~1 minute (dev speed).");
+      await loadPets();
+    } else {
+      showStatus(data.error || "Failed to incubate egg");
+    }
+  }
+
+  async function handleRenamePet(petId: string, newName: string) {
+    if (!newName.trim()) return;
+    const res = await fetch(`/api/pets/${petId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newName.trim() }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setPets((prev) => prev.map((p) => (p.id === petId ? { ...p, name: data.pet.name } : p)));
+      showStatus("Pet renamed!");
+    } else {
+      showStatus(data.error || "Failed to rename pet");
+    }
+    setEditingPetName(null);
+    setPetNameInput("");
+  }
+
   async function handleLogout() {
     await supabase.auth.signOut();
     window.location.href = "/";
+  }
+
+  async function handleLaunchRaid() {
+    if (!selectedTarget || selectedRaidPets.length === 0) return;
+    setRaidLaunching(true);
+    try {
+      const res = await fetch("/api/raid/launch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          defender_player_id: selectedTarget.player_id,
+          pet_ids: selectedRaidPets,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setLastRaidResult({
+          result: data.result,
+          depth_reached: data.depth_reached,
+          loot: data.loot,
+          dead_pets: data.dead_pets ?? [],
+          surviving_pets: data.surviving_pets ?? [],
+          energy_drained: data.energy_drained,
+        });
+        setSelectedTarget(null);
+        setSelectedRaidPets([]);
+        setShowRaidPanel(false);
+        await loadPets();
+        await loadDungeon();
+        await loadNotifications();
+        showStatus(`Raid ${data.result === "attacker_win" ? "won!" : data.result === "draw" ? "drew — partial loot gained" : "lost — pets defeated"}`);
+      } else {
+        showStatus(data.error || "Failed to launch raid");
+      }
+    } catch {
+      showStatus("Error launching raid");
+    } finally {
+      setRaidLaunching(false);
+    }
+  }
+
+  async function markNotificationSeen(id: string) {
+    await fetch(`/api/notifications/${id}/seen`, { method: "POST" });
+    setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, seen: true } : n));
+    setUnreadCount((prev) => Math.max(0, prev - 1));
   }
 
   if (loading) {
@@ -909,6 +1165,36 @@ export default function GameView({ playerId }: GameViewProps) {
             <span className="text-xs text-zinc-400">{(dungeon?.crystal_energy ?? 0).toFixed(1)}</span>
           </div>
 
+          {/* Raid button */}
+          <button
+            onClick={() => {
+              setShowRaidPanel((v) => !v);
+              if (!showRaidPanel) {
+                if (raidTab === "browse") loadBrowse();
+                else loadRaidHistory();
+              }
+            }}
+            className={"rounded px-2 py-1 text-xs transition-colors " + (showRaidPanel ? "bg-red-700 text-white" : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200")}
+          >
+            ⚔️ Raids
+          </button>
+
+          {/* Notification bell */}
+          <button
+            onClick={() => {
+              setShowNotifications((v) => !v);
+              if (!showNotifications) loadNotifications();
+            }}
+            className="relative rounded px-2 py-1 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+          >
+            🔔
+            {unreadCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </button>
+
           <button
             onClick={() => setShowAdmin((v) => !v)}
             className={"rounded px-2 py-1 text-xs transition-colors " + (showAdmin ? "bg-red-600 text-white" : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200")}
@@ -923,6 +1209,249 @@ export default function GameView({ playerId }: GameViewProps) {
           </button>
         </div>
       </div>
+
+      {/* Notification Panel */}
+      {showNotifications && (
+        <div className="absolute right-2 top-14 z-50 w-80 max-h-[60vh] overflow-auto rounded-lg bg-zinc-900/95 p-3 backdrop-blur-sm shadow-xl border border-zinc-700">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">Notifications</h3>
+            <button onClick={() => setShowNotifications(false)} className="text-zinc-500 hover:text-white">&times;</button>
+          </div>
+          {notifications.length === 0 ? (
+            <p className="text-xs text-zinc-500">No notifications yet.</p>
+          ) : (
+            <div className="space-y-1.5">
+              {notifications.map((n) => (
+                <div
+                  key={n.id}
+                  className={"rounded p-2 text-xs cursor-pointer transition-colors " + (n.seen ? "bg-zinc-800 text-zinc-400" : "bg-zinc-700 text-zinc-200 border border-zinc-600")}
+                  onClick={() => !n.seen && markNotificationSeen(n.id)}
+                >
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <span>{n.type === "raid_result" ? "⚔️" : n.type === "raid_incoming" ? "🛡️" : "🔔"}</span>
+                    <span className={
+                      n.type === "raid_result"
+                        ? (String((n.data as Record<string, unknown>).result) === "attacker_win" ? "text-green-400" : String((n.data as Record<string, unknown>).result) === "defender_win" ? "text-red-400" : "text-yellow-400")
+                        : "text-zinc-300"
+                    }>
+                      {String((n.data as Record<string, unknown>).message || n.type)}
+                    </span>
+                  </div>
+                  <div className="text-zinc-500 text-[10px]">{new Date(n.created_at).toLocaleString()}</div>
+                  {!n.seen && <div className="mt-0.5 text-[10px] text-amber-400">Click to mark read</div>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Raid Result Modal */}
+      {lastRaidResult && (
+        <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-96 rounded-xl bg-zinc-900 border border-zinc-700 p-6 shadow-2xl">
+            <div className="text-center mb-4">
+              <div className="text-4xl mb-2">
+                {lastRaidResult.result === "attacker_win" ? "🏆" : lastRaidResult.result === "draw" ? "⚖️" : "💀"}
+              </div>
+              <h2 className={
+                "text-xl font-bold " +
+                (lastRaidResult.result === "attacker_win" ? "text-green-400" : lastRaidResult.result === "draw" ? "text-yellow-400" : "text-red-400")
+              }>
+                {lastRaidResult.result === "attacker_win" ? "Victory!" : lastRaidResult.result === "draw" ? "Draw" : "Defeat"}
+              </h2>
+              <p className="text-sm text-zinc-400 mt-1">
+                Reached depth {lastRaidResult.depth_reached} · Drained {lastRaidResult.energy_drained} crystal energy
+              </p>
+            </div>
+
+            {Object.values(lastRaidResult.loot.resources).some((v) => v > 0) && (
+              <div className="bg-zinc-800 rounded-lg p-3 mb-3">
+                <div className="text-xs font-semibold text-zinc-300 mb-1.5">Loot Gained</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {Object.entries(lastRaidResult.loot.resources).map(([type, qty]) =>
+                    qty > 0 ? (
+                      <span key={type} className="rounded bg-zinc-700 px-2 py-1 text-xs text-zinc-200 capitalize">
+                        {type.replace(/_/g, " ")} ×{qty}
+                      </span>
+                    ) : null
+                  )}
+                </div>
+              </div>
+            )}
+
+            {lastRaidResult.dead_pets.length > 0 && (
+              <div className="text-xs text-red-400 mb-3">
+                {lastRaidResult.dead_pets.length} pet(s) were lost in the raid.
+              </div>
+            )}
+
+            <button
+              onClick={() => setLastRaidResult(null)}
+              className="w-full rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500"
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Raid Panel (Dungeon Browser + History) */}
+      {showRaidPanel && (
+        <div className="absolute left-1/2 top-14 z-50 -translate-x-1/2 w-[560px] max-h-[75vh] flex flex-col rounded-xl bg-zinc-900/98 border border-zinc-700 shadow-2xl overflow-hidden">
+          {/* Tabs */}
+          <div className="flex border-b border-zinc-700">
+            <button
+              onClick={() => { setRaidTab("browse"); loadBrowse(); }}
+              className={"flex-1 py-2 text-xs font-medium transition-colors " + (raidTab === "browse" ? "bg-zinc-800 text-amber-400 border-b-2 border-amber-400" : "text-zinc-400 hover:text-zinc-200")}
+            >
+              ⚔️ Browse Dungeons
+            </button>
+            <button
+              onClick={() => { setRaidTab("history"); loadRaidHistory(); }}
+              className={"flex-1 py-2 text-xs font-medium transition-colors " + (raidTab === "history" ? "bg-zinc-800 text-amber-400 border-b-2 border-amber-400" : "text-zinc-400 hover:text-zinc-200")}
+            >
+              📜 Raid History
+            </button>
+            <button onClick={() => { setShowRaidPanel(false); setSelectedTarget(null); setSelectedRaidPets([]); }} className="px-3 text-zinc-500 hover:text-white">&times;</button>
+          </div>
+
+          <div className="flex-1 overflow-auto p-3">
+            {raidTab === "browse" && (
+              <div>
+                {/* Target selection */}
+                {!selectedTarget ? (
+                  <div>
+                    <p className="text-xs text-zinc-400 mb-2">Select a dungeon to raid:</p>
+                    {browsLoading ? (
+                      <p className="text-xs text-zinc-500">Loading dungeons...</p>
+                    ) : browseDungeons.length === 0 ? (
+                      <p className="text-xs text-zinc-500">No other players found yet. Invite friends!</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {browseDungeons.map((d) => (
+                          <div
+                            key={d.dungeon_id}
+                            className="rounded-lg bg-zinc-800 p-3 cursor-pointer hover:bg-zinc-700 transition-colors"
+                            onClick={() => setSelectedTarget(d)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium text-sm text-zinc-200">{d.username}</span>
+                              <span className="text-xs text-zinc-500">{new Date(d.last_active).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex gap-3 mt-1 text-xs">
+                              <span className="text-cyan-400">Crystal: {d.crystal_energy.toFixed(0)}%</span>
+                              <span className="text-green-400">Pets: {d.pet_count}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    {/* Pet selection for raid */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <button onClick={() => setSelectedTarget(null)} className="text-zinc-400 hover:text-white text-sm">← Back</button>
+                      <span className="text-sm font-medium text-zinc-200">Raid {selectedTarget.username}</span>
+                    </div>
+                    <p className="text-xs text-zinc-400 mb-2">Select up to 3 pets for your raid squad (hunger ≥ 20%):</p>
+                    <div className="space-y-1.5 mb-3">
+                      {alivePets.length === 0 ? (
+                        <p className="text-xs text-zinc-500">No alive pets. Hatch some eggs first!</p>
+                      ) : (
+                        alivePets.map((pet) => {
+                          const isSelected = selectedRaidPets.includes(pet.id);
+                          const tooHungry = pet.hunger < 0.2;
+                          const canSelect = !tooHungry && (isSelected || selectedRaidPets.length < 3);
+                          return (
+                            <div
+                              key={pet.id}
+                              onClick={() => {
+                                if (tooHungry) return;
+                                if (isSelected) setSelectedRaidPets((prev) => prev.filter((id) => id !== pet.id));
+                                else if (selectedRaidPets.length < 3) setSelectedRaidPets((prev) => [...prev, pet.id]);
+                              }}
+                              className={
+                                "rounded p-2 text-xs flex items-center justify-between cursor-pointer transition-colors " +
+                                (isSelected ? "bg-amber-900/40 border border-amber-500" : tooHungry ? "bg-zinc-800 opacity-50 cursor-not-allowed" : "bg-zinc-800 hover:bg-zinc-700")
+                              }
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getPetColor(pet) }} />
+                                <span className="text-zinc-200">{getPetDisplayName(pet)} Lv{pet.level ?? 1}</span>
+                              </div>
+                              <div className="flex gap-2 text-zinc-400">
+                                <span>HP {pet.hp}</span>
+                                <span className={pet.hunger < 0.2 ? "text-red-400" : "text-zinc-400"}>H {(pet.hunger * 100).toFixed(0)}%</span>
+                                {isSelected && <span className="text-amber-400">✓</span>}
+                                {tooHungry && <span className="text-red-400">Too hungry</span>}
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+                    <button
+                      disabled={selectedRaidPets.length === 0 || raidLaunching}
+                      onClick={handleLaunchRaid}
+                      className="w-full rounded-lg bg-red-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {raidLaunching ? "Simulating raid..." : `⚔️ Launch Raid (${selectedRaidPets.length} pet${selectedRaidPets.length !== 1 ? "s" : ""})`}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {raidTab === "history" && (
+              <div>
+                {raidHistoryLoading ? (
+                  <p className="text-xs text-zinc-500">Loading history...</p>
+                ) : raidHistory.length === 0 ? (
+                  <p className="text-xs text-zinc-500">No raid history yet. Launch your first raid!</p>
+                ) : (
+                  <div className="space-y-2">
+                    {raidHistory.map((r) => {
+                      const isAttacker = r.role === "attacker";
+                      const won =
+                        (isAttacker && r.result === "attacker_win") ||
+                        (!isAttacker && r.result === "defender_win");
+                      const drew = r.result === "draw";
+                      return (
+                        <div key={r.id} className="rounded-lg bg-zinc-800 p-3 text-xs">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-2">
+                              <span className={won ? "text-green-400" : drew ? "text-yellow-400" : "text-red-400"}>
+                                {won ? "🏆 Win" : drew ? "⚖️ Draw" : "💀 Loss"}
+                              </span>
+                              <span className="text-zinc-400">
+                                {isAttacker ? "→ Attacked" : "← Defended vs"} {r.opponent_username}
+                              </span>
+                            </div>
+                            <span className="text-zinc-500">{new Date(r.created_at).toLocaleDateString()}</span>
+                          </div>
+                          <div className="flex gap-3 text-zinc-500">
+                            <span>Depth: {r.depth_reached ?? 0}</span>
+                            {isAttacker && r.loot && (
+                              <span className="text-green-400">
+                                Loot: {Object.entries(r.loot.resources || {}).filter(([, v]) => v > 0).map(([k, v]) => `${k.replace(/_/g, " ")} ×${v}`).join(", ") || "none"}
+                              </span>
+                            )}
+                            {!isAttacker && r.energy_drained !== null && (
+                              <span className="text-red-400">Crystal drained: {r.energy_drained}</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Admin Panel */}
       {showAdmin && (
@@ -1013,6 +1542,18 @@ export default function GameView({ playerId }: GameViewProps) {
                 step={1}
                 value={regrowthSpeed}
                 onChange={(e) => setRegrowthSpeed(Math.max(0.1, Number(e.target.value)))}
+                className="w-16 rounded bg-zinc-700 px-2 py-0.5 text-right text-zinc-200"
+              />
+            </label>
+            <label className="flex items-center justify-between text-xs text-zinc-400">
+              <span>Hatch Speed ×</span>
+              <input
+                type="number"
+                min={1}
+                max={100}
+                step={1}
+                value={hatchSpeedMultiplier}
+                onChange={(e) => setHatchSpeedMultiplier(Math.max(1, Number(e.target.value)))}
                 className="w-16 rounded bg-zinc-700 px-2 py-0.5 text-right text-zinc-200"
               />
             </label>
@@ -1138,9 +1679,28 @@ export default function GameView({ playerId }: GameViewProps) {
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded-full" style={{ backgroundColor: getPetColor(pet) }} />
                 <div>
-                  <div className="font-bold text-sm" style={{ color: getPetColor(pet) }}>
-                    {getPetDisplayName(pet)}
-                  </div>
+                  {editingPetName === pet.id ? (
+                    <form onSubmit={(e) => { e.preventDefault(); handleRenamePet(pet.id, petNameInput); }} className="flex items-center gap-1">
+                      <input
+                        autoFocus
+                        value={petNameInput}
+                        onChange={(e) => setPetNameInput(e.target.value)}
+                        maxLength={24}
+                        className="rounded bg-zinc-700 px-1.5 py-0.5 text-xs text-white border border-zinc-500 focus:outline-none focus:border-amber-400 w-28"
+                        onBlur={() => { setEditingPetName(null); setPetNameInput(""); }}
+                      />
+                      <button type="submit" className="text-[10px] text-green-400 hover:text-green-300 px-1">✓</button>
+                    </form>
+                  ) : (
+                    <div
+                      className="font-bold text-sm cursor-pointer hover:underline hover:underline-offset-2"
+                      style={{ color: getPetColor(pet) }}
+                      onClick={() => { setEditingPetName(pet.id); setPetNameInput(getPetDisplayName(pet)); }}
+                      title="Click to rename"
+                    >
+                      {getPetDisplayName(pet)} <span className="text-[9px] text-zinc-600 normal-case">✎</span>
+                    </div>
+                  )}
                   <div className="text-[10px] text-zinc-500">{monsterDef?.lore || species.replace(/_/g, " ")}</div>
                 </div>
               </div>
@@ -1282,24 +1842,117 @@ export default function GameView({ playerId }: GameViewProps) {
         );
       })()}
 
+      {/* Tile Info Popup (view tool) */}
+      {tileInfo && (
+        <div
+          className="absolute z-50 w-56 rounded-lg bg-zinc-900/95 p-3 shadow-xl border border-zinc-700 text-xs"
+          style={{ left: Math.min(tileInfo.x + 10, window.innerWidth - 240), top: Math.min(tileInfo.y + 10, window.innerHeight - 200) }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-semibold text-zinc-200">Tile Info</span>
+            <button onClick={() => setTileInfo(null)} className="text-zinc-500 hover:text-white">&times;</button>
+          </div>
+          <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
+            <span className="text-zinc-400">Type</span>
+            <span className="text-white capitalize">{tileInfo.tile.type.replace(/_/g, " ")}</span>
+            <span className="text-zinc-400">Position</span>
+            <span className="text-white">({tileInfo.tile.local_x},{tileInfo.tile.local_y}) c({tileInfo.tile.chunk_x},{tileInfo.tile.chunk_y})</span>
+            <span className="text-zinc-400">Nutrient</span>
+            <span className="text-white">{(tileInfo.tile.nutrient * 100).toFixed(0)}%</span>
+            <span className="text-zinc-400">Mana</span>
+            <span className="text-white">{tileInfo.tile.mana.toFixed(2)}</span>
+            <span className="text-zinc-400">Traffic</span>
+            <span className="text-white">{tileInfo.tile.traffic_count}</span>
+            {tileInfo.tile.regrow_at && (
+              <>
+                <span className="text-zinc-400">Regrows</span>
+                <span className="text-white">{new Date(tileInfo.tile.regrow_at).toLocaleTimeString()}</span>
+              </>
+            )}
+            {tileInfo.resource && (
+              <>
+                <span className="text-zinc-400">Resource</span>
+                <span className="text-green-400 capitalize">{tileInfo.resource.type.replace(/_/g, " ")} ×{tileInfo.resource.quantity}</span>
+              </>
+            )}
+          </div>
+          {/* Soil type badge */}
+          <div className="mt-2">
+            <span className={
+              "rounded px-1.5 py-0.5 text-[10px] font-semibold " +
+              (tileInfo.tile.mana >= 2 ? "bg-blue-900 text-blue-300" : tileInfo.tile.nutrient >= 0.6 ? "bg-green-900 text-green-300" : "bg-amber-900 text-amber-300")
+            }>
+              {tileInfo.tile.mana >= 2 ? "Crystal Soil" : tileInfo.tile.nutrient >= 0.6 ? "Green Soil" : "Brown Soil"}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Hatchery / Egg Incubation Panel */}
+      {hatcheryPanel && (() => {
+        const EGG_COSTS: Record<string, number> = {
+          glob_slime: 5, dust_mite: 5, cave_beetle: 5, mycelid: 6, wisp: 8,
+          cave_serpent: 7, stone_golem: 8, shade_wraith: 9, fang_beetle: 6,
+          moss_crawler: 5, ember_salamander: 8, crystal_sprite: 8,
+        };
+        const dust = player?.chrono_dust ?? 0;
+        return (
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-80 rounded-xl bg-zinc-900/98 p-4 shadow-2xl border border-purple-800">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-bold text-purple-300">🥚 Incubate Egg</h3>
+              <button onClick={() => setHatcheryPanel(null)} className="text-zinc-500 hover:text-white text-lg leading-none">&times;</button>
+            </div>
+            <p className="text-xs text-zinc-400 mb-3">You have <span className="text-amber-400 font-semibold">{dust} dust</span>. Choose a species to hatch:</p>
+            <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+              {Object.entries(EGG_COSTS).map(([species, cost]) => {
+                const def = MONSTER_DEF_BY_ID[species];
+                const canAfford = dust >= cost;
+                return (
+                  <button
+                    key={species}
+                    disabled={!canAfford}
+                    onClick={() => handleIncubateEgg(species)}
+                    className={"rounded-lg p-2 text-left transition-colors border " +
+                      (canAfford ? "bg-zinc-800 border-zinc-600 hover:bg-zinc-700 hover:border-purple-600 cursor-pointer" : "bg-zinc-900 border-zinc-800 opacity-50 cursor-not-allowed")}
+                  >
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: def?.color || "#888" }} />
+                      <span className="text-xs font-medium text-zinc-200">{def?.name || species.replace(/_/g, " ")}</span>
+                    </div>
+                    <div className="text-[10px] text-zinc-500">{cost} dust • {def?.lore?.slice(0, 30) || "Stage 1"}</div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
+
       <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 bg-zinc-900/80 px-4 py-3 backdrop-blur-sm">
         <button
-          onClick={() => setTool("dig")}
+          onClick={() => { setTool("dig"); setTileInfo(null); }}
           className={"rounded-lg px-4 py-2 text-sm font-medium transition-colors " + (tool === "dig" ? "bg-amber-600 text-white" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700")}
         >
-          Dig
+          ⛏ Dig
         </button>
         <button
-          onClick={() => setTool("view")}
+          onClick={() => { setTool("view"); }}
           className={"rounded-lg px-4 py-2 text-sm font-medium transition-colors " + (tool === "view" ? "bg-amber-600 text-white" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700")}
         >
-          View
+          🔍 View
+        </button>
+        <button
+          onClick={() => { setTool("hatchery"); setTileInfo(null); }}
+          className={"rounded-lg px-4 py-2 text-sm font-medium transition-colors " + (tool === "hatchery" ? "bg-purple-600 text-white" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700")}
+          title="Click corridor tiles to place hatcheries. Click hatcheries to incubate eggs."
+        >
+          🥚 Hatchery
         </button>
         <button
           onClick={() => setTool("crystal_move")}
           className={"rounded-lg px-4 py-2 text-sm font-medium transition-colors " + (tool === "crystal_move" ? "bg-cyan-600 text-white" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700")}
         >
-          Move Crystal (25d)
+          💎 Move Crystal (25d)
         </button>
       </div>
     </div>

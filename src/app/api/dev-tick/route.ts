@@ -224,6 +224,26 @@ async function processDevTick(
       petsMoved++;
     }
 
+    // Phase A2: Starvation damage — pets at 0 hunger lose HP each tick
+    const { data: starvedPets } = await supabase
+      .from("pets")
+      .select("id, hp, max_hp, hunger")
+      .eq("dungeon_id", dungeon.id)
+      .eq("status", "alive")
+      .lte("hunger", 0);
+
+    if (starvedPets) {
+      for (const pet of starvedPets) {
+        const starveDamage = Math.ceil((pet.max_hp || 40) * 0.02); // 2% max HP per tick
+        const newHp = (pet.hp || 0) - starveDamage;
+        if (newHp <= 0) {
+          await supabase.from("pets").update({ status: "dead", hp: 0 }).eq("id", pet.id);
+        } else {
+          await supabase.from("pets").update({ hp: newHp }).eq("id", pet.id);
+        }
+      }
+    }
+
     // Phase B: Combat — nearby monsters may fight
     // Refetch pets after movement (positions may have changed)
     const { data: movedPets } = await supabase
@@ -418,36 +438,79 @@ async function processPetMovement(
   const foraging = behaviorProfile?.foraging ?? 0.5;
   const preferredFood = behaviorProfile?.preferredFood ?? [];
 
-  if (pet.hunger < 0.5 || Math.random() < foraging) {
-    const { data: nearbyResources } = await supabase
+  if (pet.hunger < 0.7 || Math.random() < foraging) {
+    const { data: chunkResources } = await supabase
       .from("resources")
       .select("tile_id, type")
       .eq("dungeon_id", dungeonId);
 
-    const resourceByTile = new Map<string, string>();
-    (nearbyResources || []).forEach((r) => resourceByTile.set(r.tile_id, r.type));
+    const { data: chunkTiles } = await supabase
+      .from("tiles")
+      .select("id, local_x, local_y, chunk_x, chunk_y")
+      .eq("dungeon_id", dungeonId)
+      .eq("chunk_x", pet.chunk_x)
+      .eq("chunk_y", pet.chunk_y);
 
-    // Prioritize tiles with preferred food
+    const tileById = new Map<string, {local_x: number; local_y: number}>();
+    (chunkTiles || []).forEach((t) => tileById.set(t.id, {local_x: t.local_x, local_y: t.local_y}));
+
+    const resourceByTile = new Map<string, string>();
+    (chunkResources || []).forEach((r) => {
+      const tile = tileById.get(r.tile_id);
+      if (tile) resourceByTile.set(r.tile_id, r.type);
+    });
+
+    // Prioritize adjacent tiles with preferred food first
     const preferredNeighbors = validNeighbors.filter((t) => {
       const rType = resourceByTile.get(t.id);
       return rType && preferredFood.includes(rType);
     });
-
     const anyResourceNeighbors = validNeighbors.filter((t) =>
       resourceByTile.has(t.id)
     );
 
-    chosen =
-      preferredNeighbors.length > 0
-        ? preferredNeighbors[Math.floor(Math.random() * preferredNeighbors.length)]
-        : anyResourceNeighbors.length > 0
-          ? anyResourceNeighbors[Math.floor(Math.random() * anyResourceNeighbors.length)]
+    if (preferredNeighbors.length > 0) {
+      chosen = preferredNeighbors[Math.floor(Math.random() * preferredNeighbors.length)];
+    } else if (anyResourceNeighbors.length > 0) {
+      chosen = anyResourceNeighbors[Math.floor(Math.random() * anyResourceNeighbors.length)];
+    } else {
+      // No food adjacent — if hungry, navigate toward nearest food in chunk
+      let targetX: number | null = null;
+      let targetY: number | null = null;
+      let bestDist = Infinity;
+
+      for (const [tileId, rType] of resourceByTile.entries()) {
+        const tile = tileById.get(tileId);
+        if (!tile) continue;
+        const isPreferred = preferredFood.includes(rType);
+        const dist = Math.abs(tile.local_x - pet.tile_x!) + Math.abs(tile.local_y - pet.tile_y!);
+        const adjustedDist = isPreferred ? dist - 3 : dist; // prefer preferred food
+        if (adjustedDist < bestDist) {
+          bestDist = adjustedDist;
+          targetX = tile.local_x;
+          targetY = tile.local_y;
+        }
+      }
+
+      if (targetX !== null && targetY !== null && pet.hunger < 0.5) {
+        // Move toward target food (greedy directional)
+        const closerNeighbors = validNeighbors.filter((t) => {
+          const curDist = Math.abs(pet.tile_x! - targetX!) + Math.abs(pet.tile_y! - targetY!);
+          const newDist = Math.abs(t.local_x - targetX!) + Math.abs(t.local_y - targetY!);
+          return newDist < curDist;
+        });
+        chosen = closerNeighbors.length > 0
+          ? closerNeighbors[Math.floor(Math.random() * closerNeighbors.length)]
           : validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
+      } else {
+        chosen = validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
+      }
+    }
   } else {
     chosen = validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
   }
 
-  const newHunger = Math.max(0, pet.hunger - 0.05);
+  const newHunger = Math.max(0, pet.hunger - 0.02);
 
   // Track tiles walked
   stats.tilesWalked = (stats.tilesWalked || 0) + 1;

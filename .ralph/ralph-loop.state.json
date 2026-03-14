@@ -1,0 +1,13 @@
+{
+  "active": true,
+  "iteration": 1,
+  "minIterations": 1,
+  "maxIterations": 10,
+  "completionPromise": "COMPLETE",
+  "tasksMode": false,
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "prompt": "build and test this game to a bug free and all features done and competitive to the market reference game level, always test in agent browser to evaluate if this meet the target",
+  "startedAt": "2026-03-14T13:58:42.964Z",
+  "model": "",
+  "agent": "copilot"
+}

@@ -189,6 +189,26 @@ async function processPlayer(
     for (const pet of alivePets) {
       await processPatMovement(supabase, pet, dungeon.id, crystalFactor, now);
     }
+
+    // Starvation damage — pets at 0 hunger lose 5% max HP per tick
+    const { data: starvedPets } = await supabase
+      .from("pets")
+      .select("id, hp, max_hp, hunger")
+      .eq("dungeon_id", dungeon.id)
+      .eq("status", "alive")
+      .lte("hunger", 0);
+
+    if (starvedPets) {
+      for (const pet of starvedPets) {
+        const starveDamage = Math.ceil((pet.max_hp || 40) * 0.02);
+        const newHp = (pet.hp || 0) - starveDamage;
+        if (newHp <= 0) {
+          await supabase.from("pets").update({ status: "dead", hp: 0 }).eq("id", pet.id);
+        } else {
+          await supabase.from("pets").update({ hp: newHp }).eq("id", pet.id);
+        }
+      }
+    }
   }
 
   // 6. Egg hatching
@@ -279,32 +299,69 @@ async function processPatMovement(
 
   if (validNeighbors.length === 0) return;
 
-  // If hungry, prefer tiles near resources
+  // If hungry, prefer tiles with resources; navigate toward food if none adjacent
   let chosen;
-  if (pet.hunger < 0.5) {
-    // Check which neighbors have resources nearby
-    const { data: nearbyResources } = await supabase
+  if (pet.hunger < 0.7) {
+    const { data: chunkResources } = await supabase
       .from("resources")
-      .select("tile_id")
+      .select("tile_id, type")
       .eq("dungeon_id", dungeonId);
 
-    const resourceTileIds = new Set(
-      (nearbyResources || []).map((r) => r.tile_id)
-    );
-    const resourceNeighbors = validNeighbors.filter((t) =>
-      resourceTileIds.has(t.id)
-    );
+    const { data: chunkTiles } = await supabase
+      .from("tiles")
+      .select("id, local_x, local_y, chunk_x, chunk_y")
+      .eq("dungeon_id", dungeonId)
+      .eq("chunk_x", pet.chunk_x)
+      .eq("chunk_y", pet.chunk_y);
 
-    chosen =
-      resourceNeighbors.length > 0
-        ? resourceNeighbors[Math.floor(Math.random() * resourceNeighbors.length)]
-        : validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
+    const tileById = new Map<string, {local_x: number; local_y: number}>();
+    (chunkTiles || []).forEach((t) => tileById.set(t.id, {local_x: t.local_x, local_y: t.local_y}));
+
+    const resourceByTile = new Map<string, string>();
+    (chunkResources || []).forEach((r) => {
+      if (tileById.has(r.tile_id)) resourceByTile.set(r.tile_id, r.type);
+    });
+
+    const resourceNeighbors = validNeighbors.filter((t) => resourceByTile.has(t.id));
+
+    if (resourceNeighbors.length > 0) {
+      chosen = resourceNeighbors[Math.floor(Math.random() * resourceNeighbors.length)];
+    } else if (pet.hunger < 0.5) {
+      // Navigate toward nearest food in chunk
+      let targetX: number | null = null;
+      let targetY: number | null = null;
+      let bestDist = Infinity;
+      for (const [tileId] of resourceByTile.entries()) {
+        const tile = tileById.get(tileId);
+        if (!tile) continue;
+        const dist = Math.abs(tile.local_x - pet.tile_x!) + Math.abs(tile.local_y - pet.tile_y!);
+        if (dist < bestDist) {
+          bestDist = dist;
+          targetX = tile.local_x;
+          targetY = tile.local_y;
+        }
+      }
+      if (targetX !== null && targetY !== null) {
+        const closerNeighbors = validNeighbors.filter((t) => {
+          const curDist = Math.abs(pet.tile_x! - targetX!) + Math.abs(pet.tile_y! - targetY!);
+          const newDist = Math.abs(t.local_x - targetX!) + Math.abs(t.local_y - targetY!);
+          return newDist < curDist;
+        });
+        chosen = closerNeighbors.length > 0
+          ? closerNeighbors[Math.floor(Math.random() * closerNeighbors.length)]
+          : validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
+      } else {
+        chosen = validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
+      }
+    } else {
+      chosen = validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
+    }
   } else {
     chosen = validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
   }
 
   // Move pet
-  const newHunger = Math.max(0, pet.hunger - 0.05);
+  const newHunger = Math.max(0, pet.hunger - 0.02);
 
   await supabase
     .from("pets")

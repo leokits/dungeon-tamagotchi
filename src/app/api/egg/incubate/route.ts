@@ -3,8 +3,20 @@ import { createClient } from "@/lib/supabase/server";
 
 // Eggs cost only Chrono Dust — resources stay on tiles for pets to eat
 const EGG_DUST_COST: Record<string, number> = {
-  shroom_slime: 5,
+  glob_slime: 5,
+  dust_mite: 5,
+  cave_beetle: 5,
+  mycelid: 6,
+  wisp: 8,
+  cave_serpent: 7,
+  stone_golem: 8,
+  shade_wraith: 9,
+  fang_beetle: 6,
+  moss_crawler: 5,
+  ember_salamander: 8,
   crystal_sprite: 8,
+  // Legacy / alternate names
+  shroom_slime: 5,
   stone_crawler: 6,
 };
 
@@ -123,8 +135,9 @@ export async function POST(request: NextRequest) {
     })
     .eq("id", player.id);
 
-  // Create egg — hatches in 1 hour
-  const hatchesAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+  // Create egg — hatches in 1 hour (1 minute in dev)
+  const hatchMinutes = process.env.NODE_ENV === "production" ? 60 : 1;
+  const hatchesAt = new Date(Date.now() + hatchMinutes * 60 * 1000).toISOString();
 
   const { data: egg, error } = await supabase
     .from("eggs")
