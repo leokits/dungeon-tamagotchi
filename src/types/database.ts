@@ -37,6 +37,20 @@ export type PetBaseType =
 
 export type RaidResult = "attacker_win" | "defender_win" | "draw" | "timeout";
 
+export type ElementType = "fire" | "nature" | "crystal" | "shadow" | "neutral";
+
+export type TrapType = "spike_floor" | "poison_gas" | "decoy_crystal" | "wall_mimic" | "mana_drain";
+
+export type SkillType = "attack" | "heal" | "buff" | "debuff" | "aoe" | "stealth";
+
+export type CosmeticType = "pet_skin" | "dungeon_theme" | "crystal_effect" | "name_color" | "emote" | "title";
+
+export type QuestType = "daily" | "weekly";
+
+export type AchievementCategory = "exploration" | "collection" | "combat" | "social";
+
+export type TradeStatus = "pending" | "accepted" | "rejected" | "cancelled" | "completed";
+
 // ---- Row types ----
 
 export interface Player {
@@ -44,6 +58,10 @@ export interface Player {
   auth_id: string;
   username: string;
   chrono_dust: number;
+  level: number;
+  xp: number;
+  title: string | null;
+  avatar_cosmetic: string | null;
   last_tick_at: string;
   created_at: string;
   updated_at: string;
@@ -57,6 +75,8 @@ export interface Dungeon {
   crystal_tile_y: number;
   crystal_chunk_x: number;
   crystal_chunk_y: number;
+  theme: string;
+  crystal_effect: string;
   created_at: string;
   updated_at: string;
 }
@@ -104,6 +124,8 @@ export interface Pet {
   dungeon_id: string;
   name: string | null;
   base_type: PetBaseType;
+  species: string;
+  element: ElementType | null;
   evolution_stage: number;
   evolved_form: string | null;
   status: PetStatus;
@@ -124,7 +146,8 @@ export interface Pet {
   level: number;
   total_exp: number;
   behavior_stats: PetBehaviorStats;
-  species: string;
+  bond_level: number;
+  skin_cosmetic: string | null;
   died_at: string | null;
   death_location_x: number | null;
   death_location_y: number | null;
@@ -220,4 +243,144 @@ export function toGlobalCoords(
     x: chunkX * chunkWidth + localX,
     y: chunkY * chunkHeight + localY,
   };
+}
+
+// ---- New Deepborn types ----
+
+export interface Trap {
+  id: string;
+  dungeon_id: string;
+  tile_id: string;
+  type: TrapType;
+  damage: number;
+  triggered: boolean;
+  created_at: string;
+}
+
+export interface GuardAssignment {
+  id: string;
+  dungeon_id: string;
+  pet_id: string;
+  chunk_x: number;
+  chunk_y: number;
+  patrol_radius: number;
+  created_at: string;
+}
+
+export interface Skill {
+  id: string;
+  monster_family_id: string;
+  name: string;
+  description: string;
+  type: SkillType;
+  mp_cost: number;
+  cooldown: number;
+  power: number;
+  unlock_stage: number;
+  element: ElementType | null;
+}
+
+export interface PlayerSkill {
+  id: string;
+  pet_id: string;
+  skill_id: string;
+  unlocked_at: string;
+}
+
+export interface Achievement {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  category: AchievementCategory;
+  target_value: number;
+  reward_dust: number;
+  reward_title: string | null;
+  reward_cosmetic: string | null;
+  icon: string;
+}
+
+export interface PlayerAchievement {
+  id: string;
+  player_id: string;
+  achievement_id: string;
+  progress: number;
+  completed_at: string | null;
+  claimed_at: string | null;
+}
+
+export interface Quest {
+  id: string;
+  type: QuestType;
+  code: string;
+  name: string;
+  description: string;
+  target_value: number;
+  reward_dust: number;
+  reward_xp: number;
+  reward_cosmetic: string | null;
+  is_active: boolean;
+}
+
+export interface PlayerQuest {
+  id: string;
+  player_id: string;
+  quest_id: string;
+  progress: number;
+  completed_at: string | null;
+  claimed_at: string | null;
+  refreshed_at: string;
+}
+
+export interface Trade {
+  id: string;
+  initiator_id: string;
+  recipient_id: string;
+  status: TradeStatus;
+  initiator_offered_dust: number;
+  recipient_offered_dust: number;
+  initiator_offered_resources: Record<string, number>;
+  recipient_offered_resources: Record<string, number>;
+  initiator_offered_pets: string[];
+  recipient_offered_pets: string[];
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
+}
+
+export interface PlayerCosmetic {
+  id: string;
+  player_id: string;
+  cosmetic_id: string;
+  cosmetic_type: CosmeticType;
+  source: string;
+  unlocked_at: string;
+}
+
+export interface BattlePassSeason {
+  id: string;
+  season_number: number;
+  name: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+}
+
+export interface BattlePassProgress {
+  id: string;
+  player_id: string;
+  season_id: string;
+  tier: number;
+  xp: number;
+  has_premium: boolean;
+  claimed_free_tiers: number[];
+  claimed_premium_tiers: number[];
+}
+
+export interface LeaderboardEntry {
+  id: string;
+  player_id: string;
+  category: string;
+  score: number;
+  updated_at: string;
 }

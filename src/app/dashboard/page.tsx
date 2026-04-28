@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import GameView from "@/components/GameView";
+import GameShell from "@/components/GameShell";
 import { generateDungeon } from "@/lib/dungeon-generator";
 
 // Force dynamic rendering — env vars not available at build time
@@ -58,5 +58,5 @@ export default async function DashboardPage() {
     }
   }
 
-  return <GameView playerId={player?.id || ""} />;
+  return <GameShell playerId={player?.id || ""} />;
 }

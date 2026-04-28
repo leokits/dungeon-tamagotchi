@@ -1,8 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  /* Dungeon Tamagotchi Design Tokens */
+  --dt-bg-primary: #09090b;       /* zinc-950 */
+  --dt-bg-panel: #18181b;         /* zinc-900 */
+  --dt-bg-elevated: #27272a;      /* zinc-800 */
+  --dt-bg-hover: #3f3f46;         /* zinc-700 */
+
+  --dt-border-subtle: #3f3f46;    /* zinc-700 */
+  --dt-border-default: #52525b;   /* zinc-600 */
+
+  --dt-text-primary: #f4f4f5;     /* zinc-100 */
+  --dt-text-secondary: #a1a1aa;   /* zinc-400 */
+  --dt-text-muted: #71717a;       /* zinc-500 */
+
+  --dt-amber: #f59e0b;            /* amber-500 */
+  --dt-amber-bright: #fbbf24;     /* amber-400 */
+  --dt-amber-dark: #d97706;       /* amber-600 */
+
+  --dt-cyan: #22d3ee;             /* cyan-400 */
+  --dt-cyan-dark: #0891b2;        /* cyan-600 */
+
+  --dt-success: #22c55e;          /* green-500 */
+  --dt-warning: #eab308;          /* yellow-500 */
+  --dt-error: #ef4444;            /* red-500 */
+  --dt-info: #3b82f6;             /* blue-500 */
+
+  --dt-radius-sm: 4px;
+  --dt-radius-md: 6px;
+  --dt-radius-lg: 8px;
+
+  --dt-hud-height: 48px;
+  --dt-toolbar-height: 56px;
+  --dt-sidebar-width: 320px;
 }
 
 @theme inline {
@@ -22,5 +55,96 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  overflow: hidden;
+}
+
+/* Scrollbar styling for game panels */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--dt-border-subtle);
+  border-radius: var(--dt-radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dt-border-default);
+}
+
+/* Smooth transitions for sidebar */
+.dt-sidebar-transition {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Tooltip */
+.dt-tooltip {
+  position: relative;
+}
+
+.dt-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+  background: var(--dt-bg-elevated);
+  color: var(--dt-text-primary);
+  padding: 4px 8px;
+  border-radius: var(--dt-radius-sm);
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s, transform 0.15s;
+  border: 1px solid var(--dt-border-subtle);
+  z-index: 100;
+}
+
+.dt-tooltip:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+/* Bar animations */
+@keyframes dt-bar-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.dt-bar-animated {
+  animation: dt-bar-pulse 2s ease-in-out infinite;
+}
+
+/* Toast slide-in animation */
+@keyframes dt-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dt-toast-enter {
+  animation: dt-toast-in 0.25s ease-out forwards;
+}
+
+/* Notification badge pulse */
+@keyframes dt-badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.dt-badge-pulse {
+  animation: dt-badge-pulse 2s ease-in-out infinite;
 }

@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createClient } from "@/lib/supabase/server";
-import { simulateRaid, type RaidPet, type RaidTile } from "@/lib/raid-simulation";
+import { simulateRaid, type RaidTile } from "@/lib/raid-simulation";
+import {
+  simulateEnhancedRaid,
+  type RaidPet,
+  type RaidTrap,
+  type RaidGuard,
+  type EnhancedRaidResult,
+} from "@/game/enhanced-raid-simulation";
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -85,6 +92,58 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Defender dungeon has no tiles" }, { status: 400 });
   }
 
+  // Load defender's traps (join with tiles to get global coordinates)
+  const { data: defenderTraps } = await serviceSupabase
+    .from("traps")
+    .select(`
+      id,
+      type,
+      damage,
+      tiles (local_x, local_y, chunk_x, chunk_y)
+    `)
+    .eq("dungeon_id", defenderDungeon.id)
+    .eq("triggered", false);
+
+  // Load defender's guard assignments (join with pets for stats)
+  const { data: defenderGuards } = await serviceSupabase
+    .from("guard_assignments")
+    .select(`
+      id,
+      chunk_x,
+      chunk_y,
+      patrol_radius,
+      pets (
+        id,
+        name,
+        hp,
+        max_hp,
+        atk,
+        def,
+        spd,
+        hunger,
+        element,
+        base_type
+      )
+    `)
+    .eq("dungeon_id", defenderDungeon.id);
+
+  // Load attacker pet skills
+  const { data: attackerPetSkills } = await serviceSupabase
+    .from("player_skills")
+    .select(`
+      pet_id,
+      skills (
+        id,
+        name,
+        type,
+        mp_cost,
+        cooldown,
+        power,
+        element
+      )
+    `)
+    .in("pet_id", pet_ids);
+
   // Mark pets as raiding
   await serviceSupabase
     .from("pets")
@@ -94,19 +153,106 @@ export async function POST(request: NextRequest) {
   // Generate random seed
   const seed = Math.floor(Math.random() * 2147483647);
 
-  // Run simulation
+  // Build enhanced raid pets with skills
+  const skillsByPetId = new Map<string, typeof attackerPetSkills>();
+  if (attackerPetSkills) {
+    for (const ps of attackerPetSkills) {
+      if (!skillsByPetId.has(ps.pet_id)) {
+        skillsByPetId.set(ps.pet_id, []);
+      }
+      skillsByPetId.get(ps.pet_id)!.push(ps);
+    }
+  }
+
   const raidPets: RaidPet[] = attackPets.map((p) => ({
     id: p.id,
     name: p.name,
     hp: p.hp,
     max_hp: p.max_hp,
+    mp: p.mp ?? p.max_hp,
+    max_mp: p.max_mp ?? p.max_hp,
     atk: p.atk,
     def: p.def,
     spd: p.spd,
     hunger: p.hunger,
+    element: p.element ?? "neutral",
+    skills: (skillsByPetId.get(p.id) ?? []).map((ps: any) => ({
+      id: ps.skills.id,
+      name: ps.skills.name,
+      type: ps.skills.type,
+      mp_cost: ps.skills.mp_cost,
+      power: ps.skills.power,
+      element: ps.skills.element,
+      cooldown: ps.skills.cooldown,
+    })),
   }));
 
-  const simResult = simulateRaid(defenderTiles as RaidTile[], raidPets, seed);
+  // Build trap data with global coordinates
+  const traps: RaidTrap[] = (defenderTraps ?? [])
+    .filter((t: any) => t.tiles)
+    .map((t: any) => ({
+      id: t.id,
+      tile_x: t.tiles.chunk_x * 20 + t.tiles.local_x,
+      tile_y: t.tiles.chunk_y * 15 + t.tiles.local_y,
+      type: t.type,
+      damage: t.damage,
+    }));
+
+  // Build guard data
+  const guards: RaidGuard[] = (defenderGuards ?? [])
+    .filter((g: any) => g.pets)
+    .map((g: any) => ({
+      pet: {
+        id: g.pets.id,
+        name: g.pets.name,
+        hp: g.pets.hp,
+        max_hp: g.pets.max_hp,
+        mp: g.pets.mp ?? g.pets.max_hp,
+        max_mp: g.pets.max_mp ?? g.pets.max_hp,
+        atk: g.pets.atk,
+        def: g.pets.def,
+        spd: g.pets.spd,
+        hunger: g.pets.hunger,
+        element: g.pets.element ?? "neutral",
+        skills: [],
+      },
+      chunk_x: g.chunk_x,
+      chunk_y: g.chunk_y,
+      patrol_radius: g.patrol_radius,
+    }));
+
+  // Find entrance and crystal positions for enhanced simulation
+  const entranceTile = defenderTiles.find((t) => t.type === "entrance");
+  const crystalTile = defenderTiles.find((t) => t.type === "crystal");
+  const entrancePos = entranceTile
+    ? { x: entranceTile.chunk_x * 20 + entranceTile.local_x, y: entranceTile.chunk_y * 15 + entranceTile.local_y }
+    : null;
+  const crystalPos = crystalTile
+    ? { x: crystalTile.chunk_x * 20 + crystalTile.local_x, y: crystalTile.chunk_y * 15 + crystalTile.local_y }
+    : null;
+
+  // Run enhanced simulation with fallback to simple simulation
+  let simResult: EnhancedRaidResult | ReturnType<typeof simulateRaid> | undefined;
+
+  try {
+    if (traps.length > 0 || guards.length > 0) {
+      simResult = simulateEnhancedRaid(
+        defenderTiles as RaidTile[],
+        raidPets,
+        traps,
+        guards,
+        seed,
+        crystalPos ?? { x: 0, y: 0 },
+        entrancePos ?? { x: 0, y: 0 },
+      );
+    }
+  } catch (e) {
+    // Enhanced simulation failed — fall back to simple
+  }
+
+  if (!simResult) {
+    simResult = simulateRaid(defenderTiles as RaidTile[], raidPets, seed);
+  }
 
   // Handle dead pets — mark them dead
   for (const petId of simResult.dead_pet_ids) {
@@ -167,7 +313,7 @@ export async function POST(request: NextRequest) {
     .single();
 
   // Add loot resources to attacker's dungeon (find a random corridor tile)
-  if (attackerDungeon && Object.values(simResult.loot.resources).some((v) => v > 0)) {
+  if (attackerDungeon && Object.values(simResult.loot.resources).some((v: number) => v > 0)) {
     const { data: corridorTiles } = await serviceSupabase
       .from("tiles")
       .select("id")
@@ -177,7 +323,7 @@ export async function POST(request: NextRequest) {
 
     if (corridorTiles && corridorTiles.length > 0) {
       const resourceInserts = [];
-      for (const [type, qty] of Object.entries(simResult.loot.resources)) {
+      for (const [type, qty] of Object.entries(simResult.loot.resources) as [string, number][]) {
         if (qty <= 0) continue;
         // Distribute across random tiles
         for (let i = 0; i < qty; i++) {
@@ -252,5 +398,8 @@ export async function POST(request: NextRequest) {
     energy_drained: simResult.energy_drained,
     surviving_pets: simResult.surviving_pet_ids,
     dead_pets: simResult.dead_pet_ids,
+    traps_triggered: "traps_triggered" in simResult ? simResult.traps_triggered : 0,
+    guards_defeated: "guards_defeated" in simResult ? simResult.guards_defeated : 0,
+    guards_won: "guards_won" in simResult ? simResult.guards_won : 0,
   });
 }
