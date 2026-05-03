@@ -152,25 +152,18 @@ export default function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
       const newCompleted = [...completedSteps, stepNumber];
       setCompletedSteps(newCompleted);
 
-      try {
-        const res = await fetch("/api/tutorial", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ step_number: stepNumber }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.completed && data.reward_claimed) {
-            setIsCompleting(true);
-          }
-        }
-      } catch {
-        // API unavailable — localStorage fallback already set
+      if (stepNumber >= TOTAL_STEPS) {
+        setIsCompleting(true);
       }
 
-      if (stepNumber < TOTAL_STEPS) {
-        setCurrentStep(stepNumber);
-      }
+      // Fire-and-forget API call — don't block UX
+      fetch("/api/tutorial", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ step_number: stepNumber }),
+      }).catch(() => {});
+
+      setCurrentStep(stepNumber);
     },
     [completedSteps]
   );
@@ -200,7 +193,7 @@ export default function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
   }, [onComplete]);
 
   const step = STEPS[currentStep - 1];
-  const isComplete = currentStep > TOTAL_STEPS || isCompleting;
+  const isComplete = currentStep >= TOTAL_STEPS || isCompleting;
 
   if (!startedAt) {
     return (

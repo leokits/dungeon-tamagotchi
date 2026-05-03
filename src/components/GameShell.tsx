@@ -156,6 +156,7 @@ export default function GameShell({ playerId }: GameShellProps) {
   const [notifications, setNotifications] = useState<GameNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(true);
 
   const [showAdmin, setShowAdmin] = useState(false);
   const [tickInterval, setTickInterval] = useState(5);
@@ -739,7 +740,9 @@ export default function GameShell({ playerId }: GameShellProps) {
 
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
 
-      <TutorialOverlay />
+      {showTutorial && (
+        <TutorialOverlay onComplete={() => setShowTutorial(false)} />
+      )}
 
       {showNotifications && (
         <NotificationPanel
