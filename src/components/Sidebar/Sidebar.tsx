@@ -67,6 +67,7 @@ interface SidebarProps {
   onPetNameInputChange: (v: string) => void;
   onEditingPetNameChange: (v: string | null) => void;
   onSendToRaid: (petId: string) => void;
+  onFeedPet: (petId: string, resourceType: string) => void;
   showRaidPanel: boolean;
   raidTab: "browse" | "defense" | "history";
   onRaidTabChange: (tab: "browse" | "defense" | "history") => void;
@@ -87,6 +88,7 @@ interface SidebarProps {
   onHatcheryClose: () => void;
   onIncubateEgg: (baseType: string) => void;
   eggCosts: Record<string, number>;
+  resourceCounts: Record<string, number>;
 }
 
 const TABS: { key: SidebarTab; label: string; icon: string }[] = [
@@ -104,12 +106,12 @@ export default function Sidebar({
   isOpen, activeTab, onTabChange, onClose,
   pets, player, selectedPetId, onPetSelect, onPetBack,
   onRenamePet, editingPetName, petNameInput, onPetNameInputChange, onEditingPetNameChange,
-  onSendToRaid,
+  onSendToRaid, onFeedPet,
   showRaidPanel, raidTab, onRaidTabChange,
   browseDungeons, browseLoading, raidHistory, raidHistoryLoading,
   selectedTarget, onTargetSelect, selectedRaidPets, onRaidPetToggle,
   raidLaunching, onLaunchRaid, lastRaidResult, onRaidResultDismiss, onRaidPanelClose,
-  hatcheryPanel, onHatcheryClose, onIncubateEgg, eggCosts,
+  hatcheryPanel, onHatcheryClose, onIncubateEgg,   eggCosts, resourceCounts,
 }: SidebarProps) {
   return (
     <>
@@ -119,7 +121,7 @@ export default function Sidebar({
 
       <div
         className={`absolute left-0 top-12 bottom-14 z-30 flex flex-col border-r border-zinc-800 bg-zinc-900 dt-sidebar-transition ${
-          isOpen ? "w-80 translate-x-0" : "w-80 -translate-x-full"
+          isOpen ? "w-56 translate-x-0" : "w-56 -translate-x-full"
         }`}
       >
         <div className="flex border-b border-zinc-800">
@@ -153,6 +155,8 @@ export default function Sidebar({
                 onNameInputChange={onPetNameInputChange}
                 onEditingNameChange={onEditingPetNameChange}
                 onSendToRaid={onSendToRaid}
+                onFeedPet={onFeedPet}
+                availableResources={resourceCounts}
               />
             ) : (
               <PetPanel
@@ -162,7 +166,7 @@ export default function Sidebar({
             )
           )}
 
-          {activeTab === "inventory" && <InventoryPanel player={player} />}
+          {activeTab === "inventory" && <InventoryPanel player={player} resourceCounts={resourceCounts} />}
 
           {activeTab === "raids" && showRaidPanel && (
             <RaidPanel

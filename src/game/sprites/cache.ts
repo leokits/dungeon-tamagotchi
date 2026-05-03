@@ -6,7 +6,7 @@ import { resourceSpriteGenerator, type ResourceType, type ResourceFrame } from "
 export class SpriteCache {
   private static instance: SpriteCache;
 
-  private monsterCache = new Map<string, HTMLCanvasElement>();
+  private monsterCache = new Map<string, [HTMLCanvasElement, HTMLCanvasElement]>();
   private tileCache = new Map<string, TileFrame>();
   private resourceCache = new Map<string, ResourceFrame>();
 
@@ -19,18 +19,19 @@ export class SpriteCache {
     return SpriteCache.instance;
   }
 
-  getMonster(id: string): HTMLCanvasElement | null {
-    if (this.monsterCache.has(id)) {
-      return this.monsterCache.get(id)!;
+  getMonster(id: string, frame: number = 0): HTMLCanvasElement | null {
+    if (!this.monsterCache.has(id)) {
+      const def = MONSTER_DEF_BY_ID[id];
+      const family = MONSTER_FAMILY_BY_ID[id];
+      if (!def || !family) return null;
+
+      const f0 = monsterSpriteGenerator.generate(def, family.familyName as MonsterFamilyType, 0);
+      const f1 = monsterSpriteGenerator.generate(def, family.familyName as MonsterFamilyType, 1);
+      this.monsterCache.set(id, [f0, f1]);
     }
 
-    const def = MONSTER_DEF_BY_ID[id];
-    const family = MONSTER_FAMILY_BY_ID[id];
-    if (!def || !family) return null;
-
-    const canvas = monsterSpriteGenerator.generate(def, family.familyName as MonsterFamilyType);
-    this.monsterCache.set(id, canvas);
-    return canvas;
+    const frames = this.monsterCache.get(id)!;
+    return frames[frame % 2];
   }
 
   getTile(type: TileType, frame: number, soil: SoilType = "brown"): HTMLCanvasElement | null {

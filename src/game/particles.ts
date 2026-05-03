@@ -269,28 +269,74 @@ function randInt(min: number, max: number): number {
 
 /** Dust burst when digging a tile — 8-12 brown/tan particles. */
 export function emitDig(ps: ParticleSystem, x: number, y: number): void {
+  const mainColors = ["#8d6e63", "#a1887f", "#bcaaa4", "#d7ccc8", "#795548"];
+  const accentColors = ["#ffb74d", "#ffcc80", "#ffe0b2", "#ffd54f"];
   const count = randInt(8, 12);
-  const colors = ["#8d6e63", "#a1887f", "#bcaaa4", "#d7ccc8", "#795548"];
 
   for (let i = 0; i < count; i++) {
     const angle = rand(0, Math.PI * 2);
     const speed = rand(0.5, 2.5);
-    const life = randInt(15, 25);
+    const life = randInt(25, 40);
+    const isAccent = Math.random() > 0.7;
 
     ps.addParticle({
       x: x + rand(-0.2, 0.2),
       y: y + rand(-0.2, 0.2),
       vx: Math.cos(angle) * speed,
-      vy: Math.sin(angle) * speed - rand(0.5, 1.5),
+      vy: Math.sin(angle) * speed - rand(0.5, 2),
       life,
       maxLife: life,
-      size: rand(2, 5),
-      color: colors[randInt(0, colors.length - 1)],
-      alpha: rand(0.6, 1),
-      alphaDecay: rand(0.02, 0.05),
-      sizeDecay: rand(0.05, 0.15),
-      gravity: 0.08,
+      size: rand(2.5, 6),
+      color: isAccent ? accentColors[randInt(0, accentColors.length - 1)] : mainColors[randInt(0, mainColors.length - 1)],
+      alpha: rand(0.7, 1),
+      alphaDecay: rand(0.015, 0.035),
+      sizeDecay: rand(0.03, 0.08),
+      gravity: 0.06,
+      type: isAccent ? "glow" : "dust",
+    });
+  }
+
+  for (let i = 0; i < 15; i++) {
+    const angle = rand(0, Math.PI * 2);
+    const speed = rand(0.3, 1.2);
+    const life = randInt(20, 35);
+
+    ps.addParticle({
+      x: x + rand(-0.3, 0.3),
+      y: y + rand(-0.3, 0.3),
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - rand(0.8, 2.5),
+      life,
+      maxLife: life,
+      size: rand(1, 2.5),
+      color: mainColors[randInt(0, mainColors.length - 1)],
+      alpha: rand(0.4, 0.7),
+      alphaDecay: rand(0.02, 0.04),
+      sizeDecay: rand(0.04, 0.1),
+      gravity: 0.1,
       type: "dust",
+    });
+  }
+
+  for (let i = 0; i < 6; i++) {
+    const angle = rand(0, Math.PI * 2);
+    const speed = rand(1.5, 3.5);
+    const life = randInt(10, 18);
+
+    ps.addParticle({
+      x: x + rand(-0.1, 0.1),
+      y: y - 0.3,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - rand(1.5, 3),
+      life,
+      maxLife: life,
+      size: rand(3, 6),
+      color: accentColors[randInt(0, accentColors.length - 1)],
+      alpha: rand(0.8, 1),
+      alphaDecay: rand(0.03, 0.06),
+      sizeDecay: rand(0.05, 0.12),
+      gravity: 0.04,
+      type: "glow",
     });
   }
 }

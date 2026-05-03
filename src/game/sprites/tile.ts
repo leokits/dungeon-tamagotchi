@@ -391,6 +391,17 @@ export class TileSpriteGenerator {
       ctx.strokeStyle = "rgba(0,0,0,0.25)";
       ctx.lineWidth = 0.5;
       ctx.strokeRect(0, 0, TILE_SIZE, TILE_SIZE);
+
+      const depthGrad = ctx.createLinearGradient(0, 0, TILE_SIZE, TILE_SIZE);
+      depthGrad.addColorStop(0, "rgba(0,0,0,0)");
+      depthGrad.addColorStop(0.5, "rgba(0,0,0,0)");
+      depthGrad.addColorStop(1, "rgba(0,0,0,0.12)");
+      ctx.fillStyle = depthGrad;
+      ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+
+      ctx.fillStyle = i === 0 ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.08)";
+      ctx.fillRect(0, 0, TILE_SIZE, 1);
+      ctx.fillRect(0, 0, 1, TILE_SIZE);
     }
 
     return frames;

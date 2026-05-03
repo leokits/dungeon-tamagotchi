@@ -38,6 +38,14 @@ function resolveSpecies(pet: Pet): string {
   return LEGACY_SPECIES_MAP[raw] || raw;
 }
 
+const RESOURCE_EMOJIS: Record<string, string> = {
+  mushroom: "🍄",
+  crystal_shard: "💎",
+  bone: "🦴",
+  mana_orb: "🔮",
+  moss: "🌿",
+};
+
 interface PetDetailProps {
   petId: string;
   pets: Pet[];
@@ -48,12 +56,14 @@ interface PetDetailProps {
   onNameInputChange: (v: string) => void;
   onEditingNameChange: (v: string | null) => void;
   onSendToRaid: (petId: string) => void;
+  onFeedPet: (petId: string, resourceType: string) => void;
+  availableResources: Record<string, number>;
 }
 
 export default function PetDetail({
   petId, pets, onBack, onRename,
   editingName, nameInput, onNameInputChange, onEditingNameChange,
-  onSendToRaid,
+  onSendToRaid, onFeedPet, availableResources,
 }: PetDetailProps) {
   const pet = pets.find((p) => p.id === petId);
   if (!pet) return null;
@@ -172,6 +182,31 @@ export default function PetDetail({
             <div className={`h-full rounded-full transition-all ${hungerBarColor}`} style={{ width: hungerPct + "%" }} />
           </div>
         </div>
+
+        {pet.status === "alive" && (
+          <div className="rounded bg-zinc-800 p-2">
+            <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Feed Pet</div>
+            {hungerPct >= 100 ? (
+              <div className="text-xs text-zinc-500">Full</div>
+            ) : (
+              <div className="flex flex-wrap gap-1">
+                {Object.entries(availableResources)
+                  .filter(([_, count]) => count > 0)
+                  .map(([resourceType, count]) => (
+                    <button
+                      key={resourceType}
+                      onClick={() => onFeedPet(pet.id, resourceType)}
+                      className="rounded-lg bg-zinc-800 px-2 py-1.5 text-xs text-zinc-300 hover:bg-zinc-700 transition-colors border border-zinc-700 flex items-center gap-1"
+                    >
+                      <span>{RESOURCE_EMOJIS[resourceType] || "🍖"}</span>
+                      <span>{resourceType.replace(/_/g, " ")}</span>
+                      <span className="text-zinc-500">×{count}</span>
+                    </button>
+                  ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="rounded bg-zinc-800 p-2">
           <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Behavior</div>

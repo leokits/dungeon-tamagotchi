@@ -89,9 +89,11 @@ function hashString(str: string): number {
 }
 
 function createSeededRandom(seed: number): () => number {
-  let s = seed;
+  let s = seed % 2147483647;
+  if (s <= 0) s += 2147483647;
   return () => {
-    s = (s * 16807 + 0) % 2147483647;
+    s = (s * 16807) % 2147483647;
+    if (s <= 0) s += 2147483647;
     return (s - 1) / 2147483646;
   };
 }
@@ -990,15 +992,16 @@ export class MonsterSpriteGenerator {
    * @param family Monster family (for body shape selection)
    * @returns Offscreen HTMLCanvasElement with the rendered sprite
    */
-  generate(def: MonsterDef, family: MonsterFamilyType): HTMLCanvasElement {
+  generate(def: MonsterDef, family: MonsterFamilyType, frame: number = 0): HTMLCanvasElement {
     const size = getSpriteSize(def.stage);
     const canvas = document.createElement("canvas");
     canvas.width = size;
     canvas.height = size;
     const ctx = canvas.getContext("2d")!;
 
-    const seed = hashString(def.id);
-    const rng = createSeededRandom(seed);
+    const seedOff = frame * 104729;
+    const seed = hashString(def.id) + seedOff;
+    const rng = createSeededRandom(seed % 2147483647);
 
     // 1. Generate body mask
     const mask = generateBodyMask(family, size, rng);

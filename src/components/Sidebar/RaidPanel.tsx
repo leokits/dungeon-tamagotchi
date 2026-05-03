@@ -736,52 +736,6 @@ export default function RaidPanel({
         </div>
       )}
 
-      {lastRaidResult && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-80 rounded-xl bg-zinc-900 border border-zinc-700 p-5 shadow-2xl">
-            <div className="text-center mb-4">
-              <div className="text-3xl mb-2">
-                {lastRaidResult.result === "attacker_win" ? "\uD83C\uDFC6" : lastRaidResult.result === "draw" ? "\u2696\uFE0F" : "\uD83D\uDC80"}
-              </div>
-              <h2 className={`text-lg font-bold ${
-                lastRaidResult.result === "attacker_win" ? "text-green-400" :
-                lastRaidResult.result === "draw" ? "text-yellow-400" : "text-red-400"
-              }`}>
-                {lastRaidResult.result === "attacker_win" ? "Victory!" : lastRaidResult.result === "draw" ? "Draw" : "Defeat"}
-              </h2>
-              <p className="text-xs text-zinc-400 mt-1">
-                Depth {lastRaidResult.depth_reached} · Drained {lastRaidResult.energy_drained} CE
-              </p>
-            </div>
-            {Object.values(lastRaidResult.loot.resources).some((v) => v > 0) && (
-              <div className="bg-zinc-800 rounded-lg p-2 mb-3">
-                <div className="text-[10px] font-semibold text-zinc-300 mb-1">Loot</div>
-                <div className="flex flex-wrap gap-1">
-                  {Object.entries(lastRaidResult.loot.resources).map(([type, qty]) =>
-                    (qty as number) > 0 ? (
-                      <span key={type} className="rounded bg-zinc-700 px-2 py-0.5 text-[10px] text-zinc-200 capitalize">
-                        {type.replace(/_/g, " ")} &times;{qty}
-                      </span>
-                    ) : null
-                  )}
-                </div>
-              </div>
-            )}
-            {lastRaidResult.dead_pets.length > 0 && (
-              <div className="text-xs text-red-400 mb-3">
-                {lastRaidResult.dead_pets.length} pet(s) lost.
-              </div>
-            )}
-            <button
-              onClick={onRaidResultDismiss}
-              className="w-full rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-500"
-            >
-              Continue
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Raid Replay Modal */}
       {replayData && (
         <RaidReplay

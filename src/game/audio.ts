@@ -741,6 +741,24 @@ export class AudioManager {
     });
   }
 
+  /**
+   * Quick ascending chime — item acquire / pickup sound.
+   * Sine sweep 600→1200Hz in 150ms + sparkle at 2000Hz in 100ms.
+   */
+  playItemAcquire(): void {
+    this._playOrQueue(() => {
+      const ctx = this._audioContext!;
+      const dest = this._getDestination("sfx")!;
+      const now = ctx.currentTime;
+
+      // Main ascending sweep
+      playSweep(ctx, dest, 600, 1200, 0.15, "sine", 0.3);
+
+      // Sparkle tone
+      playTone(ctx, dest, 2000, 0.1, "sine", 0.15, 0, 0.1);
+    });
+  }
+
   // ═══════════════════════════════════════════════════════════════
   // PROCEDURAL AMBIENT MUSIC
   // ═══════════════════════════════════════════════════════════════

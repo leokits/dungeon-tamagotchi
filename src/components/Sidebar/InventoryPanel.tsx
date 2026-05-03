@@ -4,6 +4,7 @@ import type { Player } from "@/types/database";
 
 interface InventoryPanelProps {
   player: Player | null;
+  resourceCounts: Record<string, number>;
 }
 
 const RESOURCES = [
@@ -14,7 +15,7 @@ const RESOURCES = [
   { type: "moss", emoji: "🌿", label: "Moss" },
 ];
 
-export default function InventoryPanel({ player }: InventoryPanelProps) {
+export default function InventoryPanel({ player, resourceCounts = {} }: InventoryPanelProps) {
   return (
     <div className="flex h-full flex-col">
       <div className="border-b border-zinc-800 p-3">
@@ -34,7 +35,7 @@ export default function InventoryPanel({ player }: InventoryPanelProps) {
             <div key={r.type} className="rounded-lg bg-zinc-800 p-2.5">
               <div className="text-lg mb-1">{r.emoji}</div>
               <div className="text-[10px] text-zinc-500 capitalize">{r.label}</div>
-              <div className="text-sm font-mono font-bold text-zinc-200">0</div>
+              <div className="text-sm font-mono font-bold text-zinc-200">{resourceCounts[r.type] ?? 0}</div>
             </div>
           ))}
         </div>

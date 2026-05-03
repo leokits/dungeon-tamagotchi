@@ -6,6 +6,7 @@ interface TopBarProps {
   player: Player | null;
   dungeon: Dungeon | null;
   unreadCount: number;
+  resourceCounts: Record<string, number>;
   onToggleNotifications: () => void;
   onToggleAdmin: () => void;
   onLogout: () => void;
@@ -22,7 +23,7 @@ const RESOURCE_EMOJIS: Record<string, string> = {
 };
 
 export default function TopBar({
-  player, dungeon, unreadCount,
+  player, dungeon, unreadCount, resourceCounts,
   onToggleNotifications, onToggleAdmin, onLogout, onToggleSidebar, sidebarOpen,
 }: TopBarProps) {
   const crystalEnergy = dungeon?.crystal_energy ?? 0;
@@ -63,7 +64,7 @@ export default function TopBar({
           {Object.entries(RESOURCE_EMOJIS).map(([type, emoji]) => (
             <span key={type} className="flex items-center gap-0.5 text-xs" title={type}>
               <span>{emoji}</span>
-              <span className="font-mono text-zinc-500">0</span>
+              <span className="font-mono text-zinc-200">{resourceCounts[type] ?? 0}</span>
             </span>
           ))}
         </div>
@@ -96,6 +97,7 @@ export default function TopBar({
           )}
         </button>
 
+        {process.env.NODE_ENV === 'development' && (
         <button
           onClick={onToggleAdmin}
           className="flex h-7 w-7 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
@@ -106,6 +108,7 @@ export default function TopBar({
             <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4" />
           </svg>
         </button>
+        )}
 
         <a href="/codex" className="flex h-7 items-center gap-1 rounded px-2 text-xs text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200" title="Monster Codex">
           <span>📖</span>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { AudioManager } from "@/game/audio";
 
 function getSupabase() {
   // Lazy import to avoid SSR issues during build
@@ -22,7 +23,19 @@ export default function LoginPage() {
     return supabaseRef.current;
   }
 
+  function startAudio() {
+    try {
+      const audio = AudioManager.instance;
+      if (!audio.initialized) {
+        audio.init();
+      }
+      audio.startAmbient();
+    } catch {
+    }
+  }
+
   async function handleGoogleLogin() {
+    startAudio();
     setLoading(true);
     setError(null);
     const { error } = await getClient().auth.signInWithOAuth({
@@ -39,6 +52,7 @@ export default function LoginPage() {
 
   async function handleMagicLink(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    startAudio();
     setLoading(true);
     setError(null);
     const formData = new FormData(e.currentTarget);

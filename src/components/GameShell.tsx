@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Tile, Resource, Dungeon, Player, Pet, Chunk } from "@/types/database";
 import {
@@ -21,6 +21,8 @@ import BottomBar from "./ToolBar/BottomBar";
 import ToastContainer from "./Notifications/Toast";
 import NotificationPanel from "./Notifications/NotificationPanel";
 import TutorialOverlay from "./Tutorial/TutorialOverlay";
+import LoadingScreen from "./LoadingScreen";
+import VictoryDefeatOverlay from "./VictoryDefeatOverlay";
 
 const TILE_SIZE = 32;
 
@@ -127,6 +129,19 @@ export default function GameShell({ playerId }: GameShellProps) {
   const [editingPetName, setEditingPetName] = useState<string | null>(null);
   const [petNameInput, setPetNameInput] = useState("");
 
+  const resourceCounts = useRef<Record<string, number>>({});
+
+  const [resourceCountsState, setResourceCountsState] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const counts: Record<string, number> = {};
+    for (const r of resources) {
+      counts[r.type] = (counts[r.type] || 0) + r.quantity;
+    }
+    resourceCounts.current = counts;
+    setResourceCountsState({ ...counts });
+  }, [resources]);
+
   const [showRaidPanel, setShowRaidPanel] = useState(false);
   const [raidTab, setRaidTab] = useState<"browse" | "defense" | "history">("browse");
   const [browseDungeons, setBrowseDungeons] = useState<BrowseDungeon[]>([]);
@@ -164,6 +179,14 @@ export default function GameShell({ playerId }: GameShellProps) {
   const [cameraKey, setCameraKey] = useState(0);
   const particleSystemRef = useRef<ParticleSystem>(new ParticleSystem());
   const audioRef = useRef<AudioManager | null>(null);
+  const ambientPositions = useMemo(() => (
+    Array.from({ length: 12 }, () => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      dur: `${8 + Math.random() * 14}s`,
+      delay: `${-Math.random() * 12}s`,
+    }))
+  ), []);
 
   useEffect(() => {
     initSprites();
@@ -386,6 +409,7 @@ export default function GameShell({ playerId }: GameShellProps) {
         const rWorldY = chunkY * 15 * TILE_SIZE + localY * TILE_SIZE + TILE_SIZE / 2;
         emitEat(particleSystemRef.current, rWorldX, rWorldY, data.resource.type);
         audioRef.current?.playEat();
+        audioRef.current?.playItemAcquire();
       }
       if (data.pet) {
         setPets((prev) => [...prev, data.pet]);
@@ -394,6 +418,7 @@ export default function GameShell({ playerId }: GameShellProps) {
         const pWorldY = chunkY * 15 * TILE_SIZE + localY * TILE_SIZE + TILE_SIZE / 2;
         emitEvolution(particleSystemRef.current, pWorldX, pWorldY, "#7cb342");
         audioRef.current?.playHatch();
+        audioRef.current?.playItemAcquire();
       }
       addToast(msgs.length > 0 ? msgs.join(" ") : "Tile dug!", "success");
     } else {
@@ -476,6 +501,25 @@ export default function GameShell({ playerId }: GameShellProps) {
     }
     setEditingPetName(null);
     setPetNameInput("");
+  }, [addToast]);
+
+  const handleFeedPet = useCallback(async (petId: string, resourceType: string) => {
+    const res = await fetch(`/api/pets/${petId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ resource_type: resourceType }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setPets((prev) =>
+        prev.map((p) =>
+          p.id === petId ? { ...p, hunger: data.pet.hunger } : p
+        )
+      );
+      addToast("Pet fed!", "success");
+    } else {
+      addToast(data.error || "Failed to feed pet", "error");
+    }
   }, [addToast]);
 
   const handleLogout = useCallback(async () => {
@@ -577,19 +621,30 @@ export default function GameShell({ playerId }: GameShellProps) {
   const alivePets = pets.filter((p) => p.status === "alive");
 
   if (loading) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-zinc-950">
-        <p className="text-zinc-400">Loading your dungeon...</p>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-zinc-950">
+      <div className="absolute inset-0 z-12 pointer-events-none overflow-hidden">
+        {ambientPositions.map((p, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 rounded-full bg-amber-400/10 blur-[1px]"
+            style={{
+              left: p.left,
+              top: p.top,
+              animation: `ambientDrift ${p.dur} ease-in-out infinite`,
+              animationDelay: p.delay,
+            }}
+          />
+        ))}
+      </div>
       <TopBar
         player={player}
         dungeon={dungeon}
         unreadCount={unreadCount}
+        resourceCounts={resourceCountsState}
         onToggleNotifications={() => {
           setShowNotifications((v) => !v);
           if (!showNotifications) loadNotifications();
@@ -620,6 +675,7 @@ export default function GameShell({ playerId }: GameShellProps) {
           setShowRaidPanel(true);
           setSidebarTab("raids");
         }}
+        onFeedPet={handleFeedPet}
         showRaidPanel={showRaidPanel}
         raidTab={raidTab}
         onRaidTabChange={(tab) => {
@@ -648,9 +704,10 @@ export default function GameShell({ playerId }: GameShellProps) {
         eggCosts={{
           glob_slime: 5, dust_mite: 5, cave_beetle: 5, mycelid: 6, wisp: 8,
           cave_serpent: 7, stone_golem: 8, shade_wraith: 9, fang_beetle: 6,
-          moss_crawler: 5, ember_salamander: 8, crystal_sprite: 8,
-        }}
-      />
+            moss_crawler: 5, ember_salamander: 8, crystal_sprite: 8,
+          }}
+          resourceCounts={resourceCountsState}
+        />
 
       <GameCanvas
         tiles={tiles}
@@ -667,6 +724,13 @@ export default function GameShell({ playerId }: GameShellProps) {
         onCameraZoom={handleCameraZoom}
         onPetSelect={setSelectedPetId}
       />
+
+      {lastRaidResult && (
+        <VictoryDefeatOverlay
+          result={lastRaidResult}
+          onClose={() => setLastRaidResult(null)}
+        />
+      )}
 
       <BottomBar
         activeTool={tool}
@@ -685,7 +749,7 @@ export default function GameShell({ playerId }: GameShellProps) {
         />
       )}
 
-      {showAdmin && (
+      {process.env.NODE_ENV === 'development' && showAdmin && (
         <div className="absolute left-2 top-14 z-50 w-72 rounded-lg bg-zinc-900/95 p-3 backdrop-blur-sm shadow-xl border border-zinc-700">
           <h3 className="mb-2 text-xs font-bold text-red-400 uppercase tracking-wider">Admin Panel</h3>
           <div className="mb-3 rounded bg-zinc-800 p-2">
