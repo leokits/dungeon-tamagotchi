@@ -50,14 +50,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const results = await Promise.all(
+  const results = await Promise.allSettled(
     players.map((player) => processPlayer(supabase, player, now))
   );
 
+  const settledResults = results.map((r) =>
+    r.status === "fulfilled" ? r.value : { error: String(r.reason) }
+  );
+
   return NextResponse.json({
-    processed: results.length,
+    processed: settledResults.length,
     timestamp: now.toISOString(),
-    results,
+    results: settledResults,
   });
 }
 

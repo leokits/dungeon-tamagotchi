@@ -68,6 +68,25 @@ function drawSolidTile(
   ctx.fillStyle = palettes[soil][frame];
   ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
 
+  const hlGrad = ctx.createLinearGradient(0, 0, TILE_SIZE * 0.5, TILE_SIZE * 0.5);
+  hlGrad.addColorStop(0, "rgba(255,255,255,0.10)");
+  hlGrad.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = hlGrad;
+  ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+
+  for (let gy = 0; gy < TILE_SIZE; gy += 2) {
+    for (let gx = 0; gx < TILE_SIZE; gx += 2) {
+      const nv = hashCoords(gx, gy) % 100;
+      if (nv < 25) {
+        ctx.fillStyle = `rgba(0,0,0,${(nv / 25) * 0.08})`;
+        ctx.fillRect(gx, gy, 1, 1);
+      } else if (nv > 80) {
+        ctx.fillStyle = `rgba(255,255,255,${((nv - 80) / 20) * 0.06})`;
+        ctx.fillRect(gx, gy, 1, 1);
+      }
+    }
+  }
+
   // Speckle noise
   ctx.fillStyle = speckle[soil][frame];
   const sx = (hashCoords(Math.floor(rng() * 100), 0) % 7) * 4 + 2;
@@ -276,11 +295,23 @@ function drawCrystalTile(
   ctx.fillStyle = frame === 0 ? "#1a3a4a" : "#1e3e4e";
   ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
 
+
+  const glowGrad = ctx.createRadialGradient(
+    TILE_SIZE / 2, TILE_SIZE / 2, 0,
+    TILE_SIZE / 2, TILE_SIZE / 2, TILE_SIZE * 0.5
+  );
+  glowGrad.addColorStop(0, frame === 0 ? "rgba(0,240,255,0.5)" : "rgba(0,255,255,0.7)");
+  glowGrad.addColorStop(0.3, frame === 0 ? "rgba(0,200,255,0.25)" : "rgba(0,220,255,0.35)");
+  glowGrad.addColorStop(0.7, frame === 0 ? "rgba(0,150,255,0.08)" : "rgba(0,180,255,0.12)");
+  glowGrad.addColorStop(1, "rgba(0,100,200,0)");
+  ctx.fillStyle = glowGrad;
+  ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
+
   ctx.save();
   ctx.shadowColor = frame === 0 ? "#00c8ff" : "#00e0ff";
   ctx.shadowBlur = frame === 0 ? 10 : 16;
-  ctx.fillStyle = frame === 0 ? "rgba(0, 200, 255, 0.5)" : "rgba(0, 220, 255, 0.7)";
-  const cRadius = frame === 0 ? TILE_SIZE / 3 : TILE_SIZE / 3 + 1.5;
+  ctx.fillStyle = frame === 0 ? "rgba(180,240,255,0.6)" : "rgba(200,250,255,0.8)";
+  const cRadius = frame === 0 ? TILE_SIZE / 4 : TILE_SIZE / 3 + 1.5;
   ctx.beginPath();
   ctx.arc(TILE_SIZE / 2, TILE_SIZE / 2, cRadius, 0, Math.PI * 2);
   ctx.fill();
@@ -302,7 +333,6 @@ function drawCrystalTile(
     ctx.stroke();
   }
 
-  // Sparkle dots
   ctx.fillStyle = "#fff";
   ctx.beginPath();
   ctx.arc(10 + frame * 4 + sparkleOffset, 8, 1.5, 0, Math.PI * 2);
@@ -310,6 +340,21 @@ function drawCrystalTile(
   ctx.beginPath();
   ctx.arc(22 - frame * 3, 22, 1, 0, Math.PI * 2);
   ctx.fill();
+
+  const orbitCount = 2 + Math.floor(rng() * 2);
+  for (let i = 0; i < orbitCount; i++) {
+    const a = (i / orbitCount) * Math.PI * 2 + frame * 0.5 + sparkleOffset * 0.1;
+    const r = TILE_SIZE * (0.25 + i * 0.06);
+    const ox = TILE_SIZE / 2 + Math.cos(a) * r;
+    const oy = TILE_SIZE / 2 + Math.sin(a) * r;
+    const oSize = 0.8 + rng() * 0.8;
+    ctx.fillStyle = frame === 0 ? "rgba(100,220,255,0.7)" : "rgba(150,240,255,0.9)";
+    ctx.globalAlpha = 0.5 + rng() * 0.5;
+    ctx.beginPath();
+    ctx.arc(ox, oy, oSize, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
 }
 
 function drawGroundTile(
@@ -394,8 +439,8 @@ export class TileSpriteGenerator {
 
       const depthGrad = ctx.createLinearGradient(0, 0, TILE_SIZE, TILE_SIZE);
       depthGrad.addColorStop(0, "rgba(0,0,0,0)");
-      depthGrad.addColorStop(0.5, "rgba(0,0,0,0)");
-      depthGrad.addColorStop(1, "rgba(0,0,0,0.12)");
+      depthGrad.addColorStop(0.4, "rgba(0,0,0,0.03)");
+      depthGrad.addColorStop(1, "rgba(0,0,0,0.20)");
       ctx.fillStyle = depthGrad;
       ctx.fillRect(0, 0, TILE_SIZE, TILE_SIZE);
 

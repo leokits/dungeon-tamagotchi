@@ -152,18 +152,25 @@ export default function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
       const newCompleted = [...completedSteps, stepNumber];
       setCompletedSteps(newCompleted);
 
-      if (stepNumber >= TOTAL_STEPS) {
-        setIsCompleting(true);
+      try {
+        const res = await fetch("/api/tutorial", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ step_number: stepNumber }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.completed && data.reward_claimed) {
+            setIsCompleting(true);
+          }
+        }
+      } catch {
+        // API unavailable — localStorage fallback already set
       }
 
-      // Fire-and-forget API call — don't block UX
-      fetch("/api/tutorial", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ step_number: stepNumber }),
-      }).catch(() => {});
-
-      setCurrentStep(stepNumber);
+      if (stepNumber < TOTAL_STEPS) {
+        setCurrentStep(stepNumber);
+      }
     },
     [completedSteps]
   );
@@ -193,12 +200,12 @@ export default function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
   }, [onComplete]);
 
   const step = STEPS[currentStep - 1];
-  const isComplete = currentStep >= TOTAL_STEPS || isCompleting;
+  const isComplete = currentStep > TOTAL_STEPS || isCompleting;
 
   if (!startedAt) {
     return (
-      <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center">
-        <div className="rounded-2xl bg-zinc-900 border border-zinc-700 p-8 max-w-lg text-center shadow-2xl">
+      <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center pointer-events-none">
+        <div className="rounded-2xl bg-zinc-900 border border-zinc-700 p-8 max-w-lg text-center shadow-2xl pointer-events-auto">
           <div className="text-6xl mb-4">🏰</div>
           <h2 className="text-2xl font-bold text-amber-400 mb-4">Welcome to Deepborn!</h2>
           <p className="text-zinc-300 mb-6">
@@ -217,8 +224,8 @@ export default function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
 
   if (isComplete) {
     return (
-      <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center">
-        <div className="rounded-2xl bg-zinc-900 border border-zinc-700 p-8 max-w-lg text-center shadow-2xl">
+      <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center pointer-events-none">
+        <div className="rounded-2xl bg-zinc-900 border border-zinc-700 p-8 max-w-lg text-center shadow-2xl pointer-events-auto">
           <div className="text-6xl mb-4">🎉</div>
           <h2 className="text-2xl font-bold text-amber-400 mb-4">You&apos;re ready!</h2>
           <p className="text-zinc-300 mb-2">
@@ -242,8 +249,8 @@ export default function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
 
   return (
     <>
-      <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center">
-        <div className="rounded-2xl bg-zinc-900 border border-zinc-700 p-8 max-w-lg text-center shadow-2xl">
+      <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center pointer-events-none">
+        <div className="rounded-2xl bg-zinc-900 border border-zinc-700 p-8 max-w-lg text-center shadow-2xl pointer-events-auto">
           <div className="text-6xl mb-4">{step.emoji}</div>
           <h2 className="text-2xl font-bold text-amber-400 mb-4">{step.title}</h2>
           <p className="text-zinc-300 mb-6">{step.description}</p>
@@ -264,16 +271,12 @@ export default function TutorialOverlay({ onComplete }: TutorialOverlayProps) {
           </div>
 
           <div className="flex items-center justify-between">
-            {currentStep === 1 ? (
-              <button
-                onClick={handleSkip}
-                className="text-zinc-500 hover:text-zinc-300 text-sm transition-colors"
-              >
-                Skip Tutorial
-              </button>
-            ) : (
-              <div />
-            )}
+            <button
+              onClick={handleSkip}
+              className="text-zinc-500 hover:text-zinc-300 text-sm transition-colors"
+            >
+              Skip Tutorial
+            </button>
 
             <button
               onClick={handleNext}

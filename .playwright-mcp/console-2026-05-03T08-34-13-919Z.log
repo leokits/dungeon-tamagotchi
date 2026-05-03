@@ -1,0 +1,102 @@
+[     582ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[     598ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[     615ms] [ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+      <RedirectBoundary>
+        <RedirectErrorBoundary router={{...}}>
+          <InnerLayoutRouter url="/dashboard" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} ...>
+            <SegmentViewNode type="page" pagePath="dashboard/...">
+              <SegmentTrieNode>
+              <DashboardPage>
+                <GameShell playerId="57615dd3-d...">
+                  <LoadingScreen>
+                    <div className="relative f...">
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <div>
+                      <div className="relative z..." style={{...}}>
+                        <div>
+                        <div className="relative f...">
+                          <div className="relative">
+                            <ProgressRing>
+                            <SparkleParticles>
+                              <svg height={120} width={120} className="absolute l...">
+                                <circle>
+                                <circle
+                                  cx={84.26685292935872}
++                                 cy={28.712711792144546}
+-                                 cy="28.71271179199175"
+                                  r={2.8004372507175503}
+                                  fill="#fbbf24"
+                                  style={{
++                                   animation: "starTwinkle 1.6157661573806763s 0.3825968497194481s ease-in-out infinite"
+-                                   animation-duration: "1.61577s"
+-                                   animation-timing-function: "ease-in-out"
+-                                   animation-delay: "0.382597s"
+-                                   animation-iteration-count: "infinite"
+-                                   animation-direction: "normal"
+-                                   animation-fill-mode: "none"
+-                                   animation-play-state: "running"
+-                                   animation-name: "starTwinkle"
+-                                   animation-timeline: "auto"
+-                                   animation-range-start: "normal"
+-                                   animation-range-end: "normal"
+                                  }}
+                                >
+                                <circle>
+                                <circle
+                                  cx={36.17591443595302}
+                                  cy={29.054802653059596}
+                                  r={4.720446736672784}
+                                  fill="#fbbf24"
+                                  style={{
++                                   animation: "starTwinkle 1.8860670155445405s 0.05775316240729467s ease-in-out infinite"
+-                                   animation-duration: "1.88607s"
+-                                   animation-timing-function: "ease-in-out"
+-                                   animation-delay: "0.0577532s"
+-                                   animation-iteration-count: "infinite"
+-                                   animation-direction: "normal"
+-                                   animation-fill-mode: "none"
+-                                   animation-play-state: "running"
+-                                   animation-name: "starTwinkle"
+-                                   animation-timeline: "auto"
+-                                   animation-range-start: "normal"
+-                                   animation-range-end: "normal"
+                                  }}
+                                >
+                                <circle>
+                                <circle
+                                  cx={75.60611588368374}
++                                 cy={34.2148146528707}
+-                                 cy="34.214814652717905"
+                                  r={2.555162533548355}
+                                  fill="#fbbf24"
+                                  style={{animation:"starTwinkl..."}}
+                                >
+                                ...
+                            ...
+                          ...
+                        ...
+            ...
+          ...
+ @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127

@@ -1,0 +1,16 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - heading "Dungeon Tamagotchi" [level=1] [ref=e5]
+      - paragraph [ref=e6]: Build dungeons. Raise pets. Raid your friends.
+    - generic [ref=e7]:
+      - button "Continue with Google" [ref=e8]:
+        - img [ref=e9]
+        - text: Continue with Google
+      - generic [ref=e18]: or
+      - generic [ref=e19]:
+        - textbox "Email address" [ref=e20]
+        - button "Send Magic Link" [ref=e21]
+  - button "Open Next.js Dev Tools" [ref=e27] [cursor=pointer]:
+    - img [ref=e28]
+  - alert [ref=e31]

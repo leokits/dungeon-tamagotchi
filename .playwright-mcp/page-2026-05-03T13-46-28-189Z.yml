@@ -1,0 +1,28 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic: 🏰
+    - generic: ⛏️
+    - generic: 🍄
+    - generic: 💎
+    - generic: 🦴
+    - generic: 🔮
+    - generic: 🌿
+    - generic: 👁️
+    - generic: 🐾
+    - generic: 💀
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - heading "DOJOGEN" [level=1] [ref=e5]
+        - paragraph [ref=e6]: Build dungeons. Raise pets. Raid friends.
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - img [ref=e10]
+          - img [ref=e12]
+          - img [ref=e14]
+        - img [ref=e17]
+        - generic [ref=e30]: 0%
+      - paragraph [ref=e34]: Summoning dungeon...
+      - paragraph [ref=e35]: Your dungeon awaits...
+  - button "Open Next.js Dev Tools" [ref=e41] [cursor=pointer]:
+    - img [ref=e42]
+  - alert [ref=e45]

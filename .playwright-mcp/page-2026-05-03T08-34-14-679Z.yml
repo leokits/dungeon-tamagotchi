@@ -1,0 +1,37 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic: 🏰
+    - generic: ⛏️
+    - generic: 🍄
+    - generic: 💎
+    - generic: 🦴
+    - generic: 🔮
+    - generic: 🌿
+    - generic: 👁️
+    - generic: 🐾
+    - generic: 💀
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - heading "DOJOGEN" [level=1] [ref=e5]
+        - paragraph [ref=e6]: Build dungeons. Raise pets. Raid friends.
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - img [ref=e10]
+          - img [ref=e12]
+          - img [ref=e14]
+        - img [ref=e17]
+        - generic [ref=e30]: 0%
+      - paragraph [ref=e34]: Summoning dungeon...
+      - paragraph [ref=e35]: Your dungeon awaits...
+  - generic [ref=e40] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e41]:
+      - img [ref=e42]
+    - generic [ref=e45]:
+      - button "Open issues overlay" [ref=e46]:
+        - generic [ref=e47]:
+          - generic [ref=e48]: "0"
+          - generic [ref=e49]: "1"
+        - generic [ref=e50]: Issue
+      - button "Collapse issues badge" [ref=e51]:
+        - img [ref=e52]
+  - alert [ref=e54]

@@ -11,6 +11,7 @@ import {
   type MonsterFamily,
   type PetBehaviorStats as BehaviorStats,
 } from "@/game/monsters";
+import { resolveSpecies } from "@/game/species-utils";
 import { init as initSprites, spriteCache } from "@/game/sprites";
 import { ParticleSystem, emitDig, emitEvolution, emitDeath, emitEat } from "@/game/particles";
 import { AudioManager } from "@/game/audio";
@@ -32,29 +33,17 @@ const PET_COLORS: Record<string, string> = {
   stone_crawler: "#9e9e9e",
 };
 
-const LEGACY_SPECIES_MAP: Record<string, string> = {
-  shroom_slime: "glob_slime",
-  stone_crawler: "cave_beetle",
-};
-
 function getPetColor(pet: Pet): string {
-  const rawSpecies = (pet as unknown as { species?: string }).species || pet.base_type;
-  const species = LEGACY_SPECIES_MAP[rawSpecies] || rawSpecies;
+  const species = resolveSpecies(pet);
   const def = MONSTER_DEF_BY_ID[species];
   if (def) return def.color;
   return PET_COLORS[pet.base_type] || "#ff6600";
 }
 
 function getPetDisplayName(pet: Pet): string {
-  const rawSpecies = (pet as unknown as { species?: string }).species || pet.base_type;
-  const species = LEGACY_SPECIES_MAP[rawSpecies] || rawSpecies;
+  const species = resolveSpecies(pet);
   const def = MONSTER_DEF_BY_ID[species];
   return pet.name || def?.name || pet.base_type.replace(/_/g, " ");
-}
-
-function resolveSpecies(pet: Pet): string {
-  const raw = (pet as unknown as { species?: string }).species || pet.base_type;
-  return LEGACY_SPECIES_MAP[raw] || raw;
 }
 
 type Tool = "dig" | "view" | "crystal_move" | "hatchery" | "raid";
@@ -156,7 +145,21 @@ export default function GameShell({ playerId }: GameShellProps) {
   const [notifications, setNotifications] = useState<GameNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(true);
+  const STORAGE_KEY = "deepborn_tutorial";
+  
+  const getInitialShowTutorial = (): boolean => {
+    if (typeof window === "undefined") return true;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) return true;
+      const parsed = JSON.parse(stored);
+      return !(parsed.completedSteps && parsed.completedSteps.length >= 7);
+    } catch {
+      return true;
+    }
+  };
+
+  const [showTutorial, setShowTutorial] = useState(getInitialShowTutorial);
 
   const [showAdmin, setShowAdmin] = useState(false);
   const [tickInterval, setTickInterval] = useState(5);
@@ -194,7 +197,7 @@ export default function GameShell({ playerId }: GameShellProps) {
     audioRef.current = AudioManager.instance;
   }, []);
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const addToast = useCallback((message: string, type: Toast["type"] = "info") => {
     const id = `toast-${Date.now()}-${Math.random()}`;
@@ -620,6 +623,10 @@ export default function GameShell({ playerId }: GameShellProps) {
   }, [showRaidPanel, raidTab, loadBrowse, loadRaidHistory]);
 
   const alivePets = pets.filter((p) => p.status === "alive");
+  const alivePetCount = alivePets.length;
+  const basePetSlots = 2;
+  const maxPetSlots = player && typeof player.level === "number" && !isNaN(player.level) ? Math.min(basePetSlots + Math.floor(player.level / 5), 50) : basePetSlots;
+
 
   if (loading) {
     return <LoadingScreen />;
@@ -646,6 +653,8 @@ export default function GameShell({ playerId }: GameShellProps) {
         dungeon={dungeon}
         unreadCount={unreadCount}
         resourceCounts={resourceCountsState}
+        alivePetCount={alivePetCount}
+        maxPetSlots={maxPetSlots}
         onToggleNotifications={() => {
           setShowNotifications((v) => !v);
           if (!showNotifications) loadNotifications();
@@ -724,6 +733,7 @@ export default function GameShell({ playerId }: GameShellProps) {
         onCameraMove={handleCameraMove}
         onCameraZoom={handleCameraZoom}
         onPetSelect={setSelectedPetId}
+
       />
 
       {lastRaidResult && (

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import type { Tile, Resource, Pet, Chunk } from "@/types/database";
 import { MONSTER_DEF_BY_ID } from "@/game/monsters";
+import { resolveSpecies } from "@/game/species-utils";
 import { spriteCache } from "@/game/sprites";
 import { ParticleSystem, emitDig, emitEvolution, emitDeath, emitEat, emitDamage, emitCrystalGlow, emitAmbient } from "@/game/particles";
 
@@ -33,34 +34,21 @@ const PET_COLORS: Record<string, string> = {
   stone_crawler: "#9e9e9e",
 };
 
-const LEGACY_SPECIES_MAP: Record<string, string> = {
-  shroom_slime: "glob_slime",
-  stone_crawler: "cave_beetle",
-};
-
 function getPetColor(pet: Pet): string {
-  const rawSpecies = (pet as unknown as { species?: string }).species || pet.base_type;
-  const species = LEGACY_SPECIES_MAP[rawSpecies] || rawSpecies;
+  const species = resolveSpecies(pet);
   const def = MONSTER_DEF_BY_ID[species];
   if (def) return def.color;
   return PET_COLORS[pet.base_type] || "#ff6600";
 }
 
 function getPetDisplayName(pet: Pet): string {
-  const rawSpecies = (pet as unknown as { species?: string }).species || pet.base_type;
-  const species = LEGACY_SPECIES_MAP[rawSpecies] || rawSpecies;
+  const species = resolveSpecies(pet);
   const def = MONSTER_DEF_BY_ID[species];
   return pet.name || def?.name || pet.base_type.replace(/_/g, " ");
 }
 
-function resolveSpecies(pet: Pet): string {
-  const raw = (pet as unknown as { species?: string }).species || pet.base_type;
-  return LEGACY_SPECIES_MAP[raw] || raw;
-}
-
 function resolveMonsterDef(pet: Pet): import("@/game/monsters").MonsterDef | null {
-  const raw = (pet as unknown as { species?: string }).species || pet.base_type;
-  const species = LEGACY_SPECIES_MAP[raw] || raw;
+  const species = resolveSpecies(pet);
   return MONSTER_DEF_BY_ID[species] ?? null;
 }
 
@@ -78,11 +66,13 @@ interface GameCanvasProps {
   onCameraMove: (dx: number, dy: number) => void;
   onCameraZoom: (delta: number) => void;
   onPetSelect: (id: string | null) => void;
+
 }
 
 export default function GameCanvas({
   tiles, resources, pets, chunks, selectedPetId, areaCost,
   cameraRef, frameRef, particleSystem, onCanvasClick, onCameraMove, onCameraZoom, onPetSelect,
+
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dragRef = useRef<{ dragging: boolean; lastX: number; lastY: number; startX: number; startY: number }>({
@@ -652,16 +642,6 @@ export default function GameCanvas({
     for (const pet of pets) {
       if (pet.status !== "alive") continue;
       if (pet.tile_x === null || pet.tile_y === null) continue;
-      if (pet.tile_x * 20 + pet.chunk_x * 400 === localX * 32 + chunkX * 640) {
-        if (pet.tile_y * 15 + pet.chunk_y === localY * 32 + chunkY * 480) {
-          if (pet.tile_x + pet.chunk_x * 20 === tileX && pet.tile_y + pet.chunk_y * 15 === tileY) {
-            if (pet.chunk_x === chunkX && pet.chunk_y === chunkY) {
-              onPetSelect(pet.id);
-              return;
-            }
-          }
-        }
-      }
       // Simpler pet click check
       const petPx = pet.tile_x * TILE_SIZE + pet.chunk_x * 20 * TILE_SIZE;
       const petPy = pet.tile_y * TILE_SIZE + pet.chunk_y * 15 * TILE_SIZE;

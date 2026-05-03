@@ -84,33 +84,26 @@ body {
               width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Tooltip */
-.dt-tooltip {
-  position: relative;
+@keyframes ambientPulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
 }
 
-.dt-tooltip::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%) scale(0.95);
-  background: var(--dt-bg-elevated);
-  color: var(--dt-text-primary);
-  padding: 4px 8px;
-  border-radius: var(--dt-radius-sm);
-  font-size: 11px;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s, transform 0.15s;
-  border: 1px solid var(--dt-border-subtle);
-  z-index: 100;
-}
-
-.dt-tooltip:hover::after {
-  opacity: 1;
-  transform: translateX(-50%) scale(1);
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 /* Bar animations */
@@ -272,4 +265,84 @@ body {
 
 .pet-card-hover:hover {
   animation: petCardGlow 2s ease-in-out infinite;
+}
+
+/* Loading screen sparkles */
+@keyframes sparkleFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate(15px, -25px) scale(1.2);
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translate(-5px, -50px) scale(0.6);
+    opacity: 0;
+  }
+}
+
+/* Loading card ambient glow */
+@keyframes loadingCardGlow {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.06),
+                0 0 60px rgba(245, 158, 11, 0.03),
+                0 20px 60px rgba(0, 0, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(245, 158, 11, 0.1),
+                0 0 80px rgba(245, 158, 11, 0.05),
+                0 20px 60px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* Progress ring outer pulse */
+@keyframes ringPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.25;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.1;
+  }
+}
+
+/* Gradient text shift */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Tile shimmer on canvas */
+@keyframes tileShimmer {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
+
+/* Grid line shimmer */
+@keyframes gridShimmer {
+  0% { opacity: 0.08; }
+  50% { opacity: 0.25; }
+  100% { opacity: 0.08; }
+}
+
+/* Star twinkle */
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 1; transform: scale(1); }
 }

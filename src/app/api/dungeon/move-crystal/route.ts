@@ -116,18 +116,29 @@ export async function POST(request: NextRequest) {
     })
     .eq("id", dungeon.id);
 
-  // Deduct dust
-  await supabase
+  // Deduct dust atomically via DB-side arithmetic
+  const { data: updatedPlayer, error: updateError } = await supabase
     .from("players")
     .update({
-      chrono_dust: player.chrono_dust - CRYSTAL_MOVE_COST,
+      chrono_dust: "chrono_dust" - CRYSTAL_MOVE_COST,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", player.id);
+    .eq("id", player.id)
+    .gte("chrono_dust", CRYSTAL_MOVE_COST)
+    .select()
+    .single();
+
+  if (updateError) {
+    return NextResponse.json({ error: updateError.message }, { status: 500 });
+  }
+
+  if (!updatedPlayer) {
+    return NextResponse.json({ error: "Insufficient chrono dust" }, { status: 400 });
+  }
 
   return NextResponse.json({
     message: `Crystal moved! Cost: ${CRYSTAL_MOVE_COST} dust`,
     newPosition: { chunk_x, chunk_y, local_x, local_y },
-    remainingDust: player.chrono_dust - CRYSTAL_MOVE_COST,
+    remainingDust: updatedPlayer.chrono_dust,
   });
 }

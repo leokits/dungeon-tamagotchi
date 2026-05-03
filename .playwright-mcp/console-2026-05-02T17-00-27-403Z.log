@@ -1,0 +1,778 @@
+[    2586ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    2628ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  112402ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  112430ms] [LOG] [Fast Refresh] done in 27ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  297115ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  297138ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  297866ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  297929ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  298752ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  298819ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  302910ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  302975ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  304399ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  304463ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  307866ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  307933ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  309043ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  309099ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  312862ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  312927ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  313733ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  313795ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  317861ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  317928ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  318727ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  318781ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  322869ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  322934ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  323736ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  323801ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  323926ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  323985ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  327867ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  327930ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  328773ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  328837ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  332856ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  332920ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  333716ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  333772ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  337903ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  337965ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  339086ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  339117ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  342874ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  342934ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  343935ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  343991ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  344056ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  344568ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  344611ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  347853ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  347918ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  348759ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  348812ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  352858ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  352922ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  353717ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  353777ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  357849ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  357916ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  358218ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  358271ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  358725ms] [ERROR] ./src/components/GameCanvas.tsx:224:15
+Ecmascript file had an error
+  222 |
+  223 |         // Try sprite first, then fallback
+> 224 |         const spriteTileType = tile.type === "resource" ? "corridor" : tile.type;
+      |               ^^^^^^^^^^^^^^
+  225 |
+  226 |         // Subtle tile glow/pulse for special tiles
+  227 |         if (tile.type === "crystal" || tile.type === "hatchery" || (tile.mana >= 2)) {
+
+the name `spriteTileType` is defined multiple times
+
+Import traces:
+  Client Component Browser:
+    ./src/components/GameCanvas.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Client Component Browser]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/GameCanvas.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Client Component SSR]
+    ./src/components/GameShell.tsx [Server Component]
+    ./src/app/dashboard/page.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  358765ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297

@@ -128,7 +128,18 @@ export async function GET() {
     .single();
 
   if (!season) {
-    return NextResponse.json({ error: "No active season" }, { status: 404 });
+    return NextResponse.json({
+      has_active_season: false,
+      season: null,
+      player: {
+        current_tier: 0,
+        xp: 0,
+        xp_for_next_tier: 0,
+        is_premium: false,
+        claimed_free_tiers: [],
+        claimed_premium_tiers: [],
+      },
+    });
   }
 
   const progress = await getOrCreateProgress(serviceSupabase, player.id, season.id);
@@ -146,6 +157,7 @@ export async function GET() {
   const claimedPremiumTiers = progress.claimed_premium_tiers || [];
 
   return NextResponse.json({
+    has_active_season: true,
     season: {
       id: season.id,
       name: season.name,
@@ -248,13 +260,20 @@ async function handleActivatePremium(
     return NextResponse.json({ error: "Premium already activated" }, { status: 400 });
   }
 
-  const { error: dustError } = await serviceSupabase
+  const { data: updatedPlayer, error: dustError } = await serviceSupabase
     .from("players")
-    .update({ chrono_dust: player.chrono_dust - PREMIUM_COST })
-    .eq("id", playerId);
+    .update({ chrono_dust: "chrono_dust" - PREMIUM_COST })
+    .eq("id", playerId)
+    .gte("chrono_dust", PREMIUM_COST)
+    .select()
+    .single();
 
   if (dustError) {
     return NextResponse.json({ error: dustError.message }, { status: 500 });
+  }
+
+  if (!updatedPlayer) {
+    return NextResponse.json({ error: "Insufficient chrono dust" }, { status: 400 });
   }
 
   const { error: progressError } = await serviceSupabase

@@ -1,0 +1,25 @@
+3. [GET] http://localhost:3000/api/dungeon/mine => [FAILED] net::ERR_ABORTED
+4. [GET] http://localhost:3000/api/pets => [FAILED] net::ERR_ABORTED
+5. [GET] http://localhost:3000/api/pets => [FAILED] net::ERR_ABORTED
+6. [GET] http://localhost:3000/api/dungeon/mine => [FAILED] net::ERR_ABORTED
+31. [GET] http://localhost:3000/api/dungeon/mine => [200] OK
+32. [GET] http://localhost:3000/api/pets => [200] OK
+33. [GET] http://localhost:3000/api/notifications => [200] OK
+34. [POST] http://localhost:3000/api/dev-tick => [200] OK
+35. [GET] http://localhost:3000/api/dungeon/mine => [200] OK
+36. [GET] http://localhost:3000/api/pets => [200] OK
+37. [POST] http://localhost:3000/api/dev-tick => [200] OK
+38. [GET] http://localhost:3000/api/dungeon/mine => [200] OK
+39. [GET] http://localhost:3000/api/pets => [200] OK
+40. [POST] http://localhost:3000/api/dev-tick => [200] OK
+41. [GET] http://localhost:3000/api/dungeon/mine => [200] OK
+42. [GET] http://localhost:3000/api/pets => [200] OK
+43. [POST] http://localhost:3000/api/dev-tick => [200] OK
+44. [GET] http://localhost:3000/api/dungeon/mine => [200] OK
+45. [GET] http://localhost:3000/api/pets => [200] OK
+46. [POST] http://localhost:3000/api/dev-tick => [200] OK
+47. [GET] http://localhost:3000/api/dungeon/mine => [200] OK
+48. [GET] http://localhost:3000/api/pets => [200] OK
+49. [POST] http://localhost:3000/api/dev-tick
+
+Note: 26 static requests not shown, run with "static" option to see them.

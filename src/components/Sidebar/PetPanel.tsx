@@ -3,22 +3,16 @@
 import { useState } from "react";
 import type { Pet } from "@/types/database";
 import { MONSTER_DEF_BY_ID } from "@/game/monsters";
-
-const LEGACY_SPECIES_MAP: Record<string, string> = {
-  shroom_slime: "glob_slime",
-  stone_crawler: "cave_beetle",
-};
+import { resolveSpecies } from "@/game/species-utils";
 
 function getPetColor(pet: Pet): string {
-  const rawSpecies = (pet as unknown as { species?: string }).species || pet.base_type;
-  const species = LEGACY_SPECIES_MAP[rawSpecies] || rawSpecies;
+  const species = resolveSpecies(pet);
   const def = MONSTER_DEF_BY_ID[species];
   return def?.color || "#ff6600";
 }
 
 function getPetDisplayName(pet: Pet): string {
-  const rawSpecies = (pet as unknown as { species?: string }).species || pet.base_type;
-  const species = LEGACY_SPECIES_MAP[rawSpecies] || rawSpecies;
+  const species = resolveSpecies(pet);
   const def = MONSTER_DEF_BY_ID[species];
   return pet.name || def?.name || pet.base_type.replace(/_/g, " ");
 }

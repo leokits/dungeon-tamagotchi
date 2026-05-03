@@ -1,0 +1,113 @@
+- generic [ref=e1]:
+  - generic [active]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - navigation [ref=e7]:
+            - button "previous" [disabled] [ref=e8]:
+              - img "previous" [ref=e9]
+            - generic [ref=e11]:
+              - generic [ref=e12]: 1/
+              - text: "1"
+            - button "next" [disabled] [ref=e13]:
+              - img "next" [ref=e14]
+          - img
+        - generic [ref=e16]:
+          - link "Next.js 16.1.6 (stale) Turbopack" [ref=e17] [cursor=pointer]:
+            - /url: https://nextjs.org/docs/messages/version-staleness
+            - img [ref=e18]
+            - generic "There is a newer version (16.2.4) available, upgrade recommended!" [ref=e20]: Next.js 16.1.6 (stale)
+            - generic [ref=e21]: Turbopack
+          - img
+      - dialog "Runtime IndexSizeError" [ref=e23]:
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - generic [ref=e28]:
+              - generic [ref=e30]: Runtime IndexSizeError
+              - generic [ref=e31]:
+                - button "Copy Error Info" [ref=e32] [cursor=pointer]:
+                  - img [ref=e33]
+                - button "No related documentation found" [disabled] [ref=e35]:
+                  - img [ref=e36]
+                - button "Attach Node.js inspector" [ref=e38] [cursor=pointer]:
+                  - img [ref=e39]
+            - generic [ref=e48]: "Failed to execute 'arc' on 'CanvasRenderingContext2D': The radius provided (-0.459739) is negative."
+          - generic [ref=e49]:
+            - generic [ref=e50]:
+              - paragraph [ref=e52]:
+                - img [ref=e54]
+                - generic [ref=e58]: src/game/sprites/monster.ts (976:9) @ drawAura
+                - button "Open in editor" [ref=e59] [cursor=pointer]:
+                  - img [ref=e61]
+              - generic [ref=e64]:
+                - generic [ref=e65]: 974 | ctx.globalAlpha = 0.3 + rng() * 0.4;
+                - generic [ref=e66]: 975 | ctx.beginPath();
+                - generic [ref=e67]: "> 976 | ctx.arc(px, py, pr, 0, Math.PI * 2);"
+                - generic [ref=e68]: "| ^"
+                - generic [ref=e69]: 977 | ctx.fill();
+                - generic [ref=e70]: "978 | }"
+                - generic [ref=e71]: 979 | ctx.globalAlpha = 1;
+            - generic [ref=e72]:
+              - generic [ref=e73]:
+                - paragraph [ref=e74]:
+                  - text: Call Stack
+                  - generic [ref=e75]: "51"
+                - button "Show 44 ignore-listed frame(s)" [ref=e76] [cursor=pointer]:
+                  - text: Show 44 ignore-listed frame(s)
+                  - img [ref=e77]
+              - generic [ref=e79]:
+                - generic [ref=e80]:
+                  - text: drawAura
+                  - button "Open drawAura in editor" [ref=e81] [cursor=pointer]:
+                    - img [ref=e82]
+                - text: src/game/sprites/monster.ts (976:9)
+              - generic [ref=e84]:
+                - generic [ref=e85]:
+                  - text: MonsterSpriteGenerator.generate
+                  - button "Open MonsterSpriteGenerator.generate in editor" [ref=e86] [cursor=pointer]:
+                    - img [ref=e87]
+                - text: src/game/sprites/monster.ts (1075:7)
+              - generic [ref=e89]:
+                - generic [ref=e90]:
+                  - text: SpriteCache.getMonster
+                  - button "Open SpriteCache.getMonster in editor" [ref=e91] [cursor=pointer]:
+                    - img [ref=e92]
+                - text: src/game/sprites/cache.ts (29:41)
+              - generic [ref=e94]:
+                - generic [ref=e95]:
+                  - text: SpriteCache.pregenerateMonsters
+                  - button "Open SpriteCache.pregenerateMonsters in editor" [ref=e96] [cursor=pointer]:
+                    - img [ref=e97]
+                - text: src/game/sprites/cache.ts (61:12)
+              - generic [ref=e99]:
+                - generic [ref=e100]:
+                  - text: init
+                  - button "Open init in editor" [ref=e101] [cursor=pointer]:
+                    - img [ref=e102]
+                - text: src/game/sprites/index.ts (39:28)
+              - generic [ref=e104]:
+                - generic [ref=e105]:
+                  - text: GameShell.useEffect
+                  - button "Open GameShell.useEffect in editor" [ref=e106] [cursor=pointer]:
+                    - img [ref=e107]
+                - text: src/components/GameShell.tsx (171:16)
+              - generic [ref=e109]:
+                - generic [ref=e110]:
+                  - text: DashboardPage
+                  - button "Open DashboardPage in editor" [ref=e111] [cursor=pointer]:
+                    - img [ref=e112]
+                - text: src/app/dashboard/page.tsx (61:10)
+        - generic [ref=e114]: "1"
+        - generic [ref=e115]: "2"
+    - generic [ref=e120] [cursor=pointer]:
+      - button "Open Next.js Dev Tools" [ref=e121]:
+        - img [ref=e122]
+      - generic [ref=e125]:
+        - button "Open issues overlay" [ref=e126]:
+          - generic [ref=e127]:
+            - generic [ref=e128]: "0"
+            - generic [ref=e129]: "1"
+          - generic [ref=e130]: Issue
+        - button "Collapse issues badge" [ref=e131]:
+          - img [ref=e132]
+  - 'heading "Application error: a client-side exception has occurred while loading localhost (see the browser console for more information)." [level=2] [ref=e136]'

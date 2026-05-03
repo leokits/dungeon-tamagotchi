@@ -76,16 +76,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 
-  const newDustBalance = player.chrono_dust - shopItem.price_dust;
-
-  const { error: updateError } = await serviceSupabase
+  const { data: updatedPlayer, error: updateError } = await serviceSupabase
     .from("players")
-    .update({ chrono_dust: newDustBalance })
-    .eq("id", player.id);
+    .update({
+      chrono_dust: "chrono_dust" - shopItem.price_dust,
+    })
+    .eq("id", player.id)
+    .gte("chrono_dust", shopItem.price_dust)
+    .select()
+    .single();
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
+
+  if (!updatedPlayer) {
+    return NextResponse.json({ error: "Insufficient chrono dust" }, { status: 400 });
+  }
+
+  const newDustBalance = updatedPlayer.chrono_dust;
 
   return NextResponse.json({
     cosmetic,

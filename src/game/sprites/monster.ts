@@ -1033,7 +1033,36 @@ export class MonsterSpriteGenerator {
       }
     }
 
-    // 3. Body outline
+
+    ctx.save();
+    ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
+    for (let y = 0; y < size - 2; y++) {
+      for (let x = 0; x < size; x++) {
+        if (mask[y][x] && (!mask[y + 1]?.[x])) {
+          ctx.fillRect(x, y + 2, 1, 1);
+        }
+      }
+    }
+    ctx.restore();
+
+    ctx.save();
+    const bellyRgb = hexToRgb(lighten(def.color, 0.35));
+    for (let y = Math.floor(size * 0.5); y < size; y++) {
+      for (let x = 0; x < size; x++) {
+        if (!mask[y][x]) continue;
+        const dx = (x - size / 2) / (size * 0.4);
+        const dy = (y - size * 0.85) / (size * 0.18);
+        const ellipseVal = dx * dx + dy * dy;
+        if (ellipseVal < 1) {
+          const intensity = Math.max(0, 1 - ellipseVal) * 0.35;
+          ctx.fillStyle = `rgba(${bellyRgb.r},${bellyRgb.g},${bellyRgb.b},${intensity})`;
+          ctx.fillRect(x, y, 1, 1);
+        }
+      }
+    }
+    ctx.restore();
+
+
     ctx.strokeStyle = darken(def.color, 0.3);
     ctx.lineWidth = 1;
     for (let y = 0; y < size; y++) {
@@ -1052,7 +1081,81 @@ export class MonsterSpriteGenerator {
       }
     }
 
-    // 4. Draw features based on stage
+
+    ctx.save();
+    switch (family) {
+      case "Serpent": {
+        const tongueY = Math.floor(size * 0.03);
+        const tongueX = size / 2 + (rng() - 0.5) * size * 0.1;
+        ctx.fillStyle = "#cc2233";
+        ctx.fillRect(tongueX - 0.5, tongueY, 1, Math.floor(size * 0.06));
+        ctx.fillRect(tongueX - 1.5, tongueY - 1, 1, 1);
+        ctx.fillRect(tongueX + 0.5, tongueY - 1, 1, 1);
+        ctx.strokeStyle = `rgba(0,0,0,0.12)`;
+        ctx.lineWidth = 0.5;
+        for (let sy = Math.floor(size * 0.2); sy < Math.floor(size * 0.7); sy += Math.max(3, Math.floor(size * 0.06))) {
+          const sx = size / 2 + Math.sin(sy * 0.3) * size * 0.05;
+          ctx.beginPath();
+          ctx.moveTo(sx - size * 0.08, sy);
+          ctx.quadraticCurveTo(sx, sy + 1.5, sx + size * 0.08, sy);
+          ctx.stroke();
+        }
+        break;
+      }
+      case "Fungus": {
+        const gillY = Math.floor(size * 0.35);
+        const gillW = Math.floor(size * 0.25);
+        ctx.strokeStyle = `rgba(80,60,40,0.3)`;
+        ctx.lineWidth = 0.5;
+        for (let gy = 0; gy < 6; gy++) {
+          const gx = size / 2 - gillW + (gy / 5) * gillW * 2;
+          ctx.beginPath();
+          ctx.moveTo(gx, gillY);
+          ctx.quadraticCurveTo(gx + (gy - 2.5) * 2, gillY + size * 0.05, gx + (gy - 2.5), gillY + size * 0.08);
+          ctx.stroke();
+        }
+        break;
+      }
+      case "Beetle":
+      case "Fang": {
+        const jawY = Math.floor(size * 0.28);
+        const jawW = Math.max(2, Math.floor(size * 0.04));
+        ctx.fillStyle = darken(def.color, 0.2);
+        ctx.beginPath();
+        ctx.moveTo(size / 2 - jawW - 1, jawY);
+        ctx.lineTo(size / 2 - jawW - 3, jawY + size * 0.07);
+        ctx.lineTo(size / 2 - jawW + 2, jawY + size * 0.04);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(size / 2 + jawW + 1, jawY);
+        ctx.lineTo(size / 2 + jawW + 3, jawY + size * 0.07);
+        ctx.lineTo(size / 2 + jawW - 2, jawY + size * 0.04);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = lighten(def.color, 0.15);
+        ctx.fillRect(size / 2 - 1, jawY - size * 0.03, 2, size * 0.02);
+        break;
+      }
+    }
+    ctx.restore();
+
+    if (family === "Wisp" || family === "Sprite") {
+      ctx.save();
+      ctx.shadowColor = def.color;
+      ctx.shadowBlur = size * 0.25;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          if (!mask[y][x]) continue;
+          ctx.fillStyle = def.color;
+          ctx.fillRect(x, y, 1, 1);
+        }
+      }
+      ctx.restore();
+    }
+
     const features = detectFeatures(def);
 
     if (def.stage >= 2) {

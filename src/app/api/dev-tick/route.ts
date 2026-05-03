@@ -15,16 +15,7 @@ import {
   expToLevel,
   defaultBehaviorStats,
 } from "@/game/monsters";
-
-// Map legacy pet species to new bestiary IDs
-const LEGACY_SPECIES_MAP: Record<string, string> = {
-  shroom_slime: "glob_slime",
-  stone_crawler: "cave_beetle",
-};
-function resolveSpecies(species: string, baseType: string): string {
-  const raw = species || baseType;
-  return LEGACY_SPECIES_MAP[raw] || raw;
-}
+import { resolveSpeciesRaw } from "@/game/species-utils";
 
 // Dev-only tick endpoint: authenticated via session, processes only the current player.
 // Accepts optional overrides via JSON body for admin menu tuning.
@@ -260,7 +251,7 @@ async function processDevTick(
         if (pet.tile_x === null || pet.tile_y === null) continue;
 
         // Get behavior profile for aggression check
-        const monsterDef = MONSTER_DEF_BY_ID[resolveSpecies(pet.species, pet.base_type)];
+        const monsterDef = MONSTER_DEF_BY_ID[resolveSpeciesRaw(pet.species, pet.base_type)];
         const aggression = monsterDef?.behavior.aggression ?? 0.3;
 
         if (Math.random() > aggression) continue; // not aggressive enough to fight
@@ -283,7 +274,7 @@ async function processDevTick(
         // Check if any of them are prey species
         const preySpecies = monsterDef?.behavior.preySpecies ?? [];
         let target = nearbyFoes.find((f) =>
-          preySpecies.includes(resolveSpecies(f.species, f.base_type))
+          preySpecies.includes(resolveSpeciesRaw(f.species, f.base_type))
         );
 
         // If no prey found, pick random foe (only if very aggressive)
@@ -295,7 +286,7 @@ async function processDevTick(
 
         // Check cowardice — flee from predators instead of fighting
         const predators = monsterDef?.behavior.predators ?? [];
-        if (predators.includes(resolveSpecies(target.species, target.base_type))) {
+        if (predators.includes(resolveSpeciesRaw(target.species, target.base_type))) {
           const myCowardice = monsterDef?.behavior.cowardice ?? 0.5;
           if (Math.random() < myCowardice) continue; // flees
         }
@@ -399,7 +390,7 @@ async function processPetMovement(
 ) {
   if (pet.tile_x === null || pet.tile_y === null) return;
 
-  const monsterDef = MONSTER_DEF_BY_ID[resolveSpecies(pet.species, pet.base_type)];
+  const monsterDef = MONSTER_DEF_BY_ID[resolveSpeciesRaw(pet.species, pet.base_type)];
   const behaviorProfile = monsterDef?.behavior;
   const stats: PetBehaviorStats = pet.behavior_stats ?? defaultBehaviorStats();
 
@@ -705,7 +696,7 @@ async function processCombat(
   const aNewLevel = Math.min(MAX_LEVEL, expToLevel(aNewExp));
 
   // Apply level-up stat growth
-  const aDef = MONSTER_DEF_BY_ID[resolveSpecies(attacker.species, attacker.base_type)];
+  const aDef = MONSTER_DEF_BY_ID[resolveSpeciesRaw(attacker.species, attacker.base_type)];
   const aGrowth = aDef?.growth;
   const aLevelUps = aNewLevel - (attacker.level || 1);
 
@@ -713,7 +704,7 @@ async function processCombat(
     aStats.fightsWon = (aStats.fightsWon || 0) + 1;
     // Track prey hunted
     if (!aStats.preysHunted) aStats.preysHunted = {};
-    const defSpecies = resolveSpecies(defender.species, defender.base_type);
+    const defSpecies = resolveSpeciesRaw(defender.species, defender.base_type);
     aStats.preysHunted[defSpecies] = (aStats.preysHunted[defSpecies] || 0) + 1;
   } else if (defenderWon) {
     aStats.fightsLost = (aStats.fightsLost || 0) + 1;
@@ -753,14 +744,14 @@ async function processCombat(
   const dNewExp = (defender.total_exp || 0) + defenderExp;
   const dNewLevel = Math.min(MAX_LEVEL, expToLevel(dNewExp));
 
-  const dDef = MONSTER_DEF_BY_ID[resolveSpecies(defender.species, defender.base_type)];
+  const dDef = MONSTER_DEF_BY_ID[resolveSpeciesRaw(defender.species, defender.base_type)];
   const dGrowth = dDef?.growth;
   const dLevelUps = dNewLevel - (defender.level || 1);
 
   if (defenderWon) {
     dStats.fightsWon = (dStats.fightsWon || 0) + 1;
     if (!dStats.preysHunted) dStats.preysHunted = {};
-    const attSpecies = resolveSpecies(attacker.species, attacker.base_type);
+    const attSpecies = resolveSpeciesRaw(attacker.species, attacker.base_type);
     dStats.preysHunted[attSpecies] = (dStats.preysHunted[attSpecies] || 0) + 1;
   } else if (attackerWon) {
     dStats.fightsLost = (dStats.fightsLost || 0) + 1;
@@ -829,7 +820,7 @@ async function checkAndEvolve(
   },
   now: Date
 ): Promise<boolean> {
-  const currentDef = MONSTER_DEF_BY_ID[resolveSpecies(pet.species, pet.base_type)];
+  const currentDef = MONSTER_DEF_BY_ID[resolveSpeciesRaw(pet.species, pet.base_type)];
   if (!currentDef) return false;
   if (currentDef.evolutions.length === 0) return false;
 

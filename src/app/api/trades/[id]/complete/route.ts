@@ -120,26 +120,44 @@ export async function POST(
   const { id } = await params;
   const serviceSupabase = createServiceClient();
 
-  const { data: trade } = await serviceSupabase
+  const { data: fetchedTrade } = await serviceSupabase
     .from("trades")
     .select("*")
     .eq("id", id)
     .single();
 
-  if (!trade) {
+  if (!fetchedTrade) {
     return NextResponse.json({ error: "Trade not found" }, { status: 404 });
   }
 
-  if (trade.initiator_id !== player.id && trade.recipient_id !== player.id) {
+  if (fetchedTrade.initiator_id !== player.id && fetchedTrade.recipient_id !== player.id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  if (trade.status !== "accepted") {
-    return NextResponse.json({ error: `Trade must be accepted to complete (current: ${trade.status})` }, { status: 400 });
+  // Atomic status transition to prevent TOCTOU race condition
+  const { data: updatedTrade, error: transitionError } = await serviceSupabase
+    .from("trades")
+    .update({ status: "completed", updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("status", "accepted")
+    .select()
+    .single();
+
+  if (transitionError && transitionError.code === "PGRST116") {
+    return NextResponse.json({ error: "Trade is no longer accepted — may have expired or been completed by another request" }, { status: 409 });
   }
 
-  const initiatorId = trade.initiator_id;
-  const recipientId = trade.recipient_id;
+  if (transitionError) {
+    return NextResponse.json({ error: transitionError.message }, { status: 500 });
+  }
+
+  if (!updatedTrade) {
+    return NextResponse.json({ error: "Trade is no longer accepted — may have expired or been completed by another request" }, { status: 409 });
+  }
+
+
+  const initiatorId = updatedTrade.initiator_id;
+  const recipientId = updatedTrade.recipient_id;
 
   const { data: initiator } = await serviceSupabase
     .from("players")
@@ -147,7 +165,7 @@ export async function POST(
     .eq("id", initiatorId)
     .single();
 
-  if (!initiator || initiator.chrono_dust < trade.initiator_offered_dust) {
+  if (!initiator || initiator.chrono_dust < updatedTrade.initiator_offered_dust) {
     return NextResponse.json({ error: "Initiator no longer has sufficient dust" }, { status: 400 });
   }
 
@@ -157,30 +175,30 @@ export async function POST(
     .eq("id", recipientId)
     .single();
 
-  if (!recipient || recipient.chrono_dust < trade.recipient_offered_dust) {
+  if (!recipient || recipient.chrono_dust < updatedTrade.recipient_offered_dust) {
     return NextResponse.json({ error: "Recipient no longer has sufficient dust" }, { status: 400 });
   }
 
-  if (trade.initiator_offered_pets && (trade.initiator_offered_pets as string[]).length > 0) {
+  if (updatedTrade.initiator_offered_pets && (updatedTrade.initiator_offered_pets as string[]).length > 0) {
     const { data: pets } = await serviceSupabase
       .from("pets")
       .select("id")
       .eq("player_id", initiatorId)
-      .in("id", trade.initiator_offered_pets);
+      .in("id", updatedTrade.initiator_offered_pets);
 
-    if ((pets || []).length !== (trade.initiator_offered_pets as string[]).length) {
+    if ((pets || []).length !== (updatedTrade.initiator_offered_pets as string[]).length) {
       return NextResponse.json({ error: "Initiator no longer owns all offered pets" }, { status: 400 });
     }
   }
 
-  if (trade.recipient_offered_pets && (trade.recipient_offered_pets as string[]).length > 0) {
+  if (updatedTrade.recipient_offered_pets && (updatedTrade.recipient_offered_pets as string[]).length > 0) {
     const { data: pets } = await serviceSupabase
       .from("pets")
       .select("id")
       .eq("player_id", recipientId)
-      .in("id", trade.recipient_offered_pets);
+      .in("id", updatedTrade.recipient_offered_pets);
 
-    if ((pets || []).length !== (trade.recipient_offered_pets as string[]).length) {
+    if ((pets || []).length !== (updatedTrade.recipient_offered_pets as string[]).length) {
       return NextResponse.json({ error: "Recipient no longer owns all offered pets" }, { status: 400 });
     }
   }
@@ -188,28 +206,28 @@ export async function POST(
   const initiatorDungeonId = await getPlayerDungeonId(initiatorId);
   const recipientDungeonId = await getPlayerDungeonId(recipientId);
 
-  if (initiatorDungeonId && trade.initiator_offered_resources && Object.keys(trade.initiator_offered_resources).length > 0) {
+  if (initiatorDungeonId && updatedTrade.initiator_offered_resources && Object.keys(updatedTrade.initiator_offered_resources).length > 0) {
     const available = await sumDungeonResources(initiatorDungeonId);
-    for (const [type, qty] of Object.entries(trade.initiator_offered_resources)) {
+    for (const [type, qty] of Object.entries(updatedTrade.initiator_offered_resources)) {
       if ((available[type] || 0) < (qty as number)) {
         return NextResponse.json({ error: `Initiator no longer has sufficient ${type}` }, { status: 400 });
       }
     }
   }
 
-  if (recipientDungeonId && trade.recipient_offered_resources && Object.keys(trade.recipient_offered_resources).length > 0) {
+  if (recipientDungeonId && updatedTrade.recipient_offered_resources && Object.keys(updatedTrade.recipient_offered_resources).length > 0) {
     const available = await sumDungeonResources(recipientDungeonId);
-    for (const [type, qty] of Object.entries(trade.recipient_offered_resources)) {
+    for (const [type, qty] of Object.entries(updatedTrade.recipient_offered_resources)) {
       if ((available[type] || 0) < (qty as number)) {
         return NextResponse.json({ error: `Recipient no longer has sufficient ${type}` }, { status: 400 });
       }
     }
   }
 
-  // Execute exchange: dust, resources, pets, then mark completed
+  // Execute exchange: dust, resources, pets (status already set atomically above)
 
-  const initiatorNewDust = initiator.chrono_dust - trade.initiator_offered_dust + trade.recipient_offered_dust;
-  const recipientNewDust = recipient.chrono_dust + trade.initiator_offered_dust - trade.recipient_offered_dust;
+  const initiatorNewDust = initiator.chrono_dust - updatedTrade.initiator_offered_dust + updatedTrade.recipient_offered_dust;
+  const recipientNewDust = recipient.chrono_dust + updatedTrade.initiator_offered_dust - updatedTrade.recipient_offered_dust;
 
   await serviceSupabase
     .from("players")
@@ -222,40 +240,30 @@ export async function POST(
     .eq("id", recipientId);
 
   if (initiatorDungeonId && recipientDungeonId) {
-    if (trade.initiator_offered_resources && Object.keys(trade.initiator_offered_resources).length > 0) {
-      await deductResources(initiatorDungeonId, trade.initiator_offered_resources);
-      await addResources(recipientDungeonId, trade.initiator_offered_resources);
+    if (updatedTrade.initiator_offered_resources && Object.keys(updatedTrade.initiator_offered_resources).length > 0) {
+      await deductResources(initiatorDungeonId, updatedTrade.initiator_offered_resources);
+      await addResources(recipientDungeonId, updatedTrade.initiator_offered_resources);
     }
-    if (trade.recipient_offered_resources && Object.keys(trade.recipient_offered_resources).length > 0) {
-      await deductResources(recipientDungeonId, trade.recipient_offered_resources);
-      await addResources(initiatorDungeonId, trade.recipient_offered_resources);
+    if (updatedTrade.recipient_offered_resources && Object.keys(updatedTrade.recipient_offered_resources).length > 0) {
+      await deductResources(recipientDungeonId, updatedTrade.recipient_offered_resources);
+      await addResources(initiatorDungeonId, updatedTrade.recipient_offered_resources);
     }
   }
 
-  if (trade.initiator_offered_pets && (trade.initiator_offered_pets as string[]).length > 0) {
+  if (updatedTrade.initiator_offered_pets && (updatedTrade.initiator_offered_pets as string[]).length > 0) {
     await serviceSupabase
       .from("pets")
       .update({ player_id: recipientId })
-      .in("id", trade.initiator_offered_pets);
+      .in("id", updatedTrade.initiator_offered_pets);
   }
 
-  if (trade.recipient_offered_pets && (trade.recipient_offered_pets as string[]).length > 0) {
+  if (updatedTrade.recipient_offered_pets && (updatedTrade.recipient_offered_pets as string[]).length > 0) {
     await serviceSupabase
       .from("pets")
       .update({ player_id: initiatorId })
-      .in("id", trade.recipient_offered_pets);
+      .in("id", updatedTrade.recipient_offered_pets);
   }
 
-  const { data: updatedTrade, error } = await serviceSupabase
-    .from("trades")
-    .update({ status: "completed", updated_at: new Date().toISOString() })
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
 
   return NextResponse.json({ success: true, trade: updatedTrade });
 }

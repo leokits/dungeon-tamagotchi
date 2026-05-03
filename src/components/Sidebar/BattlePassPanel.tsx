@@ -185,7 +185,7 @@ export default function BattlePassPanel() {
           </div>
         )}
 
-        {!loading && data && (
+        {!loading && data && data.season && (
           <>
             <div className="rounded-lg bg-gradient-to-r from-amber-900/50 to-purple-900/50 border border-amber-700/50 p-4 mb-4">
               <div className="flex items-center justify-between mb-2">

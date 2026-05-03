@@ -1,0 +1,326 @@
+Total messages: 5 (Errors: 1, Warnings: 0)
+Returning 1 messages for level "error"
+
+[ERROR] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+      <RedirectBoundary>
+        <RedirectErrorBoundary router={{...}}>
+          <InnerLayoutRouter url="/dashboard" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} ...>
+            <SegmentViewNode type="page" pagePath="dashboard/...">
+              <SegmentTrieNode>
+              <DashboardPage>
+                <GameShell playerId="57615dd3-d...">
+                  <LoadingScreen>
+                    <div className="relative f...">
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <FloatingEmoji>
+                      <div>
+                      <div className="relative z...">
+                        <div>
+                        <div className="relative f...">
+                          <div className="relative">
+                            <ProgressRing>
+                            <SparkleParticles>
+                              <svg height={120} width={120} className="absolute l...">
+                                <circle
++                                 cx={58.90809184104243}
+-                                 cx="81.89650383122641"
++                                 cy={26.26112342342272}
+-                                 cy="22.18828266030497"
++                                 r={2.8993805360764515}
+-                                 r="3.211963591296132"
+                                  fill="#fbbf24"
+                                  style={{
++                                   animation: "starTwinkle 3.224755016294974s 2.4446178396915736s ease-in-out infinite"
+-                                   animation-duration: "3.21045s"
+-                                   animation-timing-function: "ease-in-out"
+-                                   animation-delay: "1.30036s"
+-                                   animation-iteration-count: "infinite"
+-                                   animation-direction: "normal"
+-                                   animation-fill-mode: "none"
+-                                   animation-play-state: "running"
+-                                   animation-name: "starTwinkle"
+-                                   animation-timeline: "auto"
+-                                   animation-range-start: "normal"
+-                                   animation-range-end: "normal"
+                                  }}
+                                >
+                                <circle
++                                 cx={65.34053405891069}
+-                                 cx="28.616934748022107"
++                                 cy={51.24737106991167}
+-                                 cy="69.33392714795403"
++                                 r={2.898551620926855}
+-                                 r="2.360703384265802"
+                                  fill="#fbbf24"
+                                  style={{
++                                   animation: "starTwinkle 3.399713816288914s 1.7661859113329716s ease-in-out infinite"
+-                                   animation-duration: "3.39217s"
+-                                   animation-timing-function: "ease-in-out"
+-                                   animation-delay: "0.552309s"
+-                                   animation-iteration-count: "infinite"
+-                                   animation-direction: "normal"
+-                                   animation-fill-mode: "none"
+-                                   animation-play-state: "running"
+-                                   animation-name: "starTwinkle"
+-                                   animation-timeline: "auto"
+-                                   animation-range-start: "normal"
+-                                   animation-range-end: "normal"
+                                  }}
+                                >
+                                <circle
++                                 cx={28.49124564516029}
+-                                 cx="34.079495528750776"
++                                 cy={72.06125918032222}
+-                                 cy="69.69326287555408"
++                                 r={2.3839479148770297}
+-                                 r="2.4106304281060043"
+                                  fill="#fbbf24"
+                                  style={{
++                                   animation: "starTwinkle 3.4243404091886775s 2.9058493943480332s ease-in-out infinite"
+-                                   animation-duration: "3.06025s"
+-                                   animation-timing-function: "ease-in-out"
+-                                   animation-delay: "0.0156035s"
+-                                   animation-iteration-count: "infinite"
+-                                   animation-direction: "normal"
+-                                   animation-fill-mode: "none"
+-                                   animation-play-state: "running"
+-                                   animation-name: "starTwinkle"
+-                                   animation-timeline: "auto"
+-                                   animation-range-start: "normal"
+-                                   animation-range-end: "normal"
+                                  }}
+                                >
+                                <circle
++                                 cx={56.725176720391644}
+-                                 cx="56.31492798387173"
++                                 cy={64.69855975665453}
+-                                 cy="44.83081793590614"
++                                 r={2.842216485751149}
+-                                 r="3.1579706342441414"
+                                  fill="#fbbf24"
+                                  style={{
++                                   animation: "starTwinkle 2.833777878027731s 1.1087208560604682s ease-in-out infinite"
+-                                   animation-duration: "3.3592s"
+-                                   animation-timing-function: "ease-in-out"
+-                                   animation-delay: "0.332841s"
+-                                   animation-iteration-count: "infinite"
+-                                   animation-direction: "normal"
+-                                   animation-fill-mode: "none"
+-                                   animation-play-state: "running"
+-                                   animation-name: "starTwinkle"
+-                                   animation-timeline: "auto"
+-                                   animation-range-start: "normal"
+-                                   animation-range-end: "normal"
+                                  }}
+                                >
+                                <circle
++                                 cx={43.01257998392309}
+-                                 cx="69.54240202745653"
++                                 cy={22.453129241073718}
+-                                 cy="76.07254052200997"
++                                 r={3.027035184880431}
+-                                 r="4.226518358934212"
+                                  fill="#fbbf24"
+                                  style={{
++                                   animation: "starTwinkle 2.074974988709878s 2.2945060767711256s ease-in-out infinite"
+-                                   animation-duration: "2.51807s"
+-                                   animation-timing-function: "ease-in-out"
+-                                   animation-delay: "2.02986s"
+-                                   animation-iteration-count: "infinite"
+-                                   animation-direction: "normal"
+-                                   animation-fill-mode: "none"
+-                                   animation-play-state: "running"
+-                                   animation-name: "starTwinkle"
+-                                   animation-timeline: "auto"
+-                                   animation-range-start: "normal"
+-                                   animation-range-end: "normal"
+                                  }}
+                                >
+                                <circle
++                                 cx={81.65057393470843}
+-                                 cx="55.710405510755514"
++                                 cy={29.665568341719997}
+-                                 cy="73.12921974887725"
++                                 r={2.5256379395479778}
+-                                 r="3.6286533214370382"
+                                  fill="#fbbf24"
+                                  style={{
++                                   animation: "starTwinkle 3.0629346502576826s 2.6925060211682204s ease-in-out infinite"
+-                                   animation-duration: "2.0534s"
+-                                   animation-timing-function: "ease-in-out"
+-                                   animation-delay: "0.169969s"
+-                                   animation-iteration-count: "infinite"
+-                                   animation-direction: "normal"
+-                                   animation-fill-mode: "none"
+-                                   animation-play-state: "running"
+-                                   animation-name: "starTwinkle"
+-                                   animation-timeline: "auto"
+-                                   animation-range-start: "normal"
+-                                   animation-range-end: "normal"
+                                  }}
+                                >
+                                <circle
++                                 cx={65.4295746408161}
+-                                 cx="50.28472103964777"
++                                 cy={23.828989675495535}
+-                                 cy="75.10904349813586"
++                                 r={4.071758621553105}
+-                                 r="2.867771215119192"
+                                  fill="#fbbf24"
+                                  style={{
++                                   animation: "starTwinkle 2.1195791009505554s 0.7856423921152482s ease-in-out infinite"
+-                                   animation-duration: "2.59801s"
+-                                   animation-timing-function: "ease-in-out"
+-                                   animation-delay: "2.73091s"
+-                                   animation-iteration-count: "infinite"
+-                                   animation-direction: "normal"
+-                                   animation-fill-mode: "none"
+-                                   animation-play-state: "running"
+-                                   animation-name: "starTwinkle"
+-                                   animation-timeline: "auto"
+-                                   animation-range-start: "normal"
+-                                   animation-range-end: "normal"
+                                  }}
+                                >
+                                <circle
++                                 cx={57.325935045774344}
+-                                 cx="52.51006908910053"
++                                 cy={81.96658166563209}
+-                                 cy="74.24250086742545"
++                                 r={2.636548725784385}
+-                                 r="2.149975319773965"
+                                  fill="#fbbf24"
+                                  style={{
++                                   animation: "starTwinkle 3.070552537070302s 2.4616003561484336s ease-in-out infinite"
+-                                   animation-duration: "3.36757s"
+-                                   animation-timing-function: "ease-in-out"
+-                                   animation-delay: "1.5042s"
+-                                   animation-iteration-count: "infinite"
+-                                   animation-direction: "normal"
+-                                   animation-fill-mode: "none"
+-                                   animation-play-state: "running"
+-                                   animation-name: "starTwinkle"
+-                                   animation-timeline: "auto"
+-                                   animation-range-start: "normal"
+-                                   animation-range-end: "normal"
+                                  }}
+                                >
+                                <circle
++                                 cx={36.94826415112421}
+-                                 cx="92.28428370207814"
++                                 cy={28.961710152709365}
+-                                 cy="49.905986203055946"
++                                 r={2.2330534814534073}
+-                                 r="3.2373418313965825"
+                                  fill="#fbbf24"
+                                  style={{
++                                   animation: "starTwinkle 2.882749909989232s 1.0419200324675106s ease-in-out infinite"
+-                                   animation-duration: "2.8772s"
+-                                   animation-timing-function: "ease-in-out"
+-                                   animation-delay: "1.10833s"
+-                                   animation-iteration-count: "infinite"
+-                                   animation-direction: "normal"
+-                                   animation-fill-mode: "none"
+-                                   animation-play-state: "running"
+-                                   animation-name: "starTwinkle"
+-                                   animation-timeline: "auto"
+-                                   animation-range-start: "normal"
+-                                   animation-range-end: "normal"
+                                  }}
+                                >
+                                <circle
++                                 cx={76.523032772694}
+-                                 cx="34.711553236400476"
++                                 cy={68.96048207760796}
+-                                 cy="24.917664734557796"
++                                 r={4.476096102457381}
+-                                 r="3.7808783532230583"
+                                  fill="#fbbf24"
+                                  style={{
++                                   animation: "starTwinkle 2.9689459719985036s 1.342194369541129s ease-in-out infinite"
+-                                   animation-duration: "2.52354s"
+-                                   animation-timing-function: "ease-in-out"
+-                                   animation-delay: "2.53322s"
+-                                   animation-iteration-count: "infinite"
+-                                   animation-direction: "normal"
+-                                   animation-fill-mode: "none"
+-                                   animation-play-state: "running"
+-                                   animation-name: "starTwinkle"
+-                                   animation-timeline: "auto"
+-                                   animation-range-start: "normal"
+-                                   animation-range-end: "normal"
+                                  }}
+                                >
+                                <circle
++                                 cx={98.75626004654127}
+-                                 cx="93.77192061393927"
++                                 cy={59.69012599246892}
+-                                 cy="22.416312878715125"
++                                 r={2.95151745048941}
+-                                 r="3.9376642607015064"
+                                  fill="#fbbf24"
+                                  style={{
++                                   animation: "starTwinkle 3.296219034256267s 0.5961654194620948s ease-in-out infinite"
+-                                   animation-duration: "1.83193s"
+-                                   animation-timing-function: "ease-in-out"
+-                                   animation-delay: "1.38478s"
+-                                   animation-iteration-count: "infinite"
+-                                   animation-direction: "normal"
+-                                   animation-fill-mode: "none"
+-                                   animation-play-state: "running"
+-                                   animation-name: "starTwinkle"
+-                                   animation-timeline: "auto"
+-                                   animation-range-start: "normal"
+-                                   animation-range-end: "normal"
+                                  }}
+                                >
+                                <circle
++                                 cx={42.08117766469227}
+-                                 cx="43.78510708277109"
++                                 cy={57.58188551999894}
+-                                 cy="92.56847939548751"
++                                 r={4.672871955054403}
+-                                 r="2.898456974846234"
+                                  fill="#fbbf24"
+                                  style={{
++                                   animation: "starTwinkle 2.5536623118858772s 2.8404490581245114s ease-in-out infinite"
+-                                   animation-duration: "1.57985s"
+-                                   animation-timing-function: "ease-in-out"
+-                                   animation-delay: "1.6807s"
+-                                   animation-iteration-count: "infinite"
+-                                   animation-direction: "normal"
+-                                   animation-fill-mode: "none"
+-                                   animation-play-state: "running"
+-                                   animation-name: "starTwinkle"
+-                                   animation-timeline: "auto"
+-                                   animation-range-start: "normal"
+-                                   animation-range-end: "normal"
+                                  }}
+                                >
+                            ...
+                          ...
+                        ...
+            ...
+          ...
+ @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127

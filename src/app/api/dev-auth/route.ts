@@ -8,9 +8,27 @@ const DEV_EMAIL = "dev@dungeon-tamagotchi.local";
  * Creates a test user and generates a magic link for instant login.
  * Only works in development (NODE_ENV !== 'production').
  */
-export async function POST() {
+export async function POST(request: Request) {
   if (process.env.NODE_ENV === "production") {
     return NextResponse.json({ error: "Not available in production" }, { status: 403 });
+  }
+
+  // Additional security: if SUPABASE_DEV_SECRET is set, it must be provided and match
+  const devSecret = process.env.SUPABASE_DEV_SECRET;
+  if (devSecret) {
+    let body: { secret?: string };
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    }
+    if (body.secret !== devSecret) {
+      return NextResponse.json({ error: "Invalid dev secret" }, { status: 403 });
+    }
+  }
+
+  if (!process.env.SUPABASE_DEV_SECRET) {
+    return NextResponse.json({ error: "Dev auth secret not configured" }, { status: 503 });
   }
 
   const supabase = createServiceClient();

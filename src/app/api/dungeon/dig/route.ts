@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
       .eq("chunk_y", n.cy)
       .eq("local_x", n.x)
       .eq("local_y", n.y)
-      .single();
+      .maybeSingle();
 
     if (neighborTile && walkableTypes.includes(neighborTile.type)) {
       hasWalkableNeighbor = true;
@@ -238,7 +238,7 @@ export async function POST(request: NextRequest) {
         .eq("chunk_y", nc.cy)
         .eq("local_x", nc.x)
         .eq("local_y", nc.y)
-        .single();
+        .maybeSingle();
 
       if (!nTile || !walkableForSpawn.includes(nTile.type)) continue;
 
@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
         .from("resources")
         .select("type")
         .eq("tile_id", nTile.id)
-        .single();
+        .maybeSingle();
 
       const neighborSoil = getSoilType(nTile.nutrient, nTile.mana);
       if (neighborSoil === tileSoil) {

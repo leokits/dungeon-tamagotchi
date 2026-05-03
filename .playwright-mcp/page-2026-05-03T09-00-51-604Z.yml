@@ -1,0 +1,95 @@
+- generic [ref=e1]:
+  - generic [active]:
+    - generic [ref=e309]:
+      - generic [ref=e310]:
+        - generic [ref=e311]:
+          - navigation [ref=e312]:
+            - button "previous" [disabled] [ref=e313]:
+              - img "previous" [ref=e314]
+            - generic [ref=e316]:
+              - generic [ref=e317]: 1/
+              - text: "1"
+            - button "next" [disabled] [ref=e318]:
+              - img "next" [ref=e319]
+          - img
+        - generic [ref=e321]:
+          - link "Next.js 16.1.6 (stale) Turbopack" [ref=e322] [cursor=pointer]:
+            - /url: https://nextjs.org/docs/messages/version-staleness
+            - img [ref=e323]
+            - generic "There is a newer version (16.2.4) available, upgrade recommended!" [ref=e325]: Next.js 16.1.6 (stale)
+            - generic [ref=e326]: Turbopack
+          - img
+      - dialog "Runtime TypeError" [ref=e328]:
+        - generic [ref=e331]:
+          - generic [ref=e332]:
+            - generic [ref=e333]:
+              - generic [ref=e335]: Runtime TypeError
+              - generic [ref=e336]:
+                - button "Copy Error Info" [ref=e337] [cursor=pointer]:
+                  - img [ref=e338]
+                - button "No related documentation found" [disabled] [ref=e340]:
+                  - img [ref=e341]
+                - button "Attach Node.js inspector" [ref=e343] [cursor=pointer]:
+                  - img [ref=e344]
+            - generic [ref=e353]: Cannot read properties of null (reading 'name')
+          - generic [ref=e354]:
+            - generic [ref=e355]:
+              - paragraph [ref=e357]:
+                - img [ref=e359]
+                - generic [ref=e362]: src/components/Sidebar/BattlePassPanel.tsx (192:79) @ BattlePassPanel
+                - button "Open in editor" [ref=e363] [cursor=pointer]:
+                  - img [ref=e365]
+              - generic [ref=e368]:
+                - generic [ref=e369]: 190 | <div className="rounded-lg bg-gradient-to-r from-amber-900/50 to-purple-900/50 border border-amber-700/50 p-4 mb-4">
+                - generic [ref=e370]: 191 | <div className="flex items-center justify-between mb-2">
+                - generic [ref=e371]: "> 192 | <h3 className=\"text-sm font-bold text-amber-300\">{data.season.name}</h3>"
+                - generic [ref=e372]: "| ^"
+                - generic [ref=e373]: "193 | <span className=\"text-xs text-zinc-400\">{data.season.days_remaining} days left</span>"
+                - generic [ref=e374]: 194 | </div>
+                - generic [ref=e375]: 195 |
+            - generic [ref=e376]:
+              - generic [ref=e377]:
+                - paragraph [ref=e378]:
+                  - text: Call Stack
+                  - generic [ref=e379]: "15"
+                - button "Show 11 ignore-listed frame(s)" [ref=e380] [cursor=pointer]:
+                  - text: Show 11 ignore-listed frame(s)
+                  - img [ref=e381]
+              - generic [ref=e383]:
+                - generic [ref=e384]:
+                  - text: BattlePassPanel
+                  - button "Open BattlePassPanel in editor" [ref=e385] [cursor=pointer]:
+                    - img [ref=e386]
+                - text: src/components/Sidebar/BattlePassPanel.tsx (192:79)
+              - generic [ref=e388]:
+                - generic [ref=e389]:
+                  - text: Sidebar
+                  - button "Open Sidebar in editor" [ref=e390] [cursor=pointer]:
+                    - img [ref=e391]
+                - text: src/components/Sidebar/Sidebar.tsx (211:38)
+              - generic [ref=e393]:
+                - generic [ref=e394]:
+                  - text: GameShell
+                  - button "Open GameShell in editor" [ref=e395] [cursor=pointer]:
+                    - img [ref=e396]
+                - text: src/components/GameShell.tsx (668:7)
+              - generic [ref=e398]:
+                - generic [ref=e399]:
+                  - text: DashboardPage
+                  - button "Open DashboardPage in editor" [ref=e400] [cursor=pointer]:
+                    - img [ref=e401]
+                - text: src/app/dashboard/page.tsx (61:10)
+        - generic [ref=e403]: "1"
+        - generic [ref=e404]: "2"
+    - generic [ref=e6] [cursor=pointer]:
+      - button "Open Next.js Dev Tools" [ref=e7]:
+        - img [ref=e8]
+      - generic [ref=e405]:
+        - button "Open issues overlay" [ref=e406]:
+          - generic [ref=e407]:
+            - generic [ref=e408]: "0"
+            - generic [ref=e409]: "1"
+          - generic [ref=e410]: Issue
+        - button "Collapse issues badge" [ref=e411]:
+          - img [ref=e412]
+  - 'heading "Application error: a client-side exception has occurred while loading localhost (see the browser console for more information)." [level=2] [ref=e416]'

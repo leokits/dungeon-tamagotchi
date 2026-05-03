@@ -126,14 +126,25 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Deduct chrono dust (no resource cost — resources stay on tiles for pets)
-  await supabase
+  // Deduct chrono dust atomically via DB-side arithmetic
+  const { data: updatedPlayer, error: updateError } = await supabase
     .from("players")
     .update({
-      chrono_dust: player.chrono_dust - dustCost,
+      chrono_dust: "chrono_dust" - dustCost,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", player.id);
+    .eq("id", player.id)
+    .gte("chrono_dust", dustCost)
+    .select()
+    .single();
+
+  if (updateError) {
+    return NextResponse.json({ error: updateError.message }, { status: 500 });
+  }
+
+  if (!updatedPlayer) {
+    return NextResponse.json({ error: "Insufficient chrono dust" }, { status: 400 });
+  }
 
   // Create egg — hatches in 1 hour (1 minute in dev)
   const hatchMinutes = process.env.NODE_ENV === "production" ? 60 : 1;

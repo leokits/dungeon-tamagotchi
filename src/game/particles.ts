@@ -20,7 +20,13 @@ export type ParticleType =
   | "eat"
   | "evolution"
   | "ambient"
-  | "damage";
+  | "damage"
+  | "levelUp"
+  | "combo"
+  | "evolutionRing"
+  | "crystalPulse"
+  | "resourceCollect"
+  | "screenFlash";
 
 export interface Particle {
   x: number;          // World X position
@@ -502,7 +508,7 @@ export function emitCrystalGlow(ps: ParticleSystem, x: number, y: number): void 
   }
 }
 
-/** Ambient dungeon atmosphere — 1-2 subtle particles in an area. */
+/** Ambient dungeon atmosphere */
 export function emitAmbient(
   ps: ParticleSystem,
   x: number,
@@ -532,4 +538,299 @@ export function emitAmbient(
       type: "ambient",
     });
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// COMMERCIAL-GRADE PRESET EMITTER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════
+
+/** Level-up celebration — golden ring burst + floating stars + sparkle trail */
+export function emitLevelUp(
+  ps: ParticleSystem,
+  x: number,
+  y: number
+): void {
+  const palette = ["#fbbf24", "#f59e0b", "#fcd34d", "#fef3c7", "#ffffff", "#a855f7", "#c084fc"];
+
+  // Ring burst
+  for (let i = 0; i < 24; i++) {
+    const angle = (i / 24) * Math.PI * 2;
+    const speed = rand(1.5, 3.5);
+
+    ps.addParticle({
+      x: x / TILE_SIZE + Math.cos(angle) * rand(0.05, 0.15),
+      y: y / TILE_SIZE + Math.sin(angle) * rand(0.05, 0.15),
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - rand(0.5, 2),
+      life: randInt(30, 50),
+      maxLife: 50,
+      size: rand(2, 5),
+      color: palette[i % palette.length],
+      alpha: rand(0.8, 1),
+      alphaDecay: rand(0.01, 0.025),
+      sizeDecay: rand(0.02, 0.05),
+      gravity: -0.01,
+      type: "levelUp",
+    });
+  }
+
+  // Rising sparkle stars
+  for (let i = 0; i < 15; i++) {
+    const life = randInt(20, 40);
+    ps.addParticle({
+      x: x / TILE_SIZE + rand(-0.5, 0.5),
+      y: y / TILE_SIZE + rand(0.2, 0.5),
+      vx: rand(-0.3, 0.3),
+      vy: rand(-1.5, -0.5),
+      life,
+      maxLife: life,
+      size: rand(1.5, 4),
+      color: palette[randInt(0, palette.length - 1)],
+      alpha: rand(0.6, 0.9),
+      alphaDecay: rand(0.015, 0.035),
+      sizeDecay: rand(0.02, 0.05),
+      gravity: -0.03,
+      type: "sparkle",
+    });
+  }
+
+  // Floating "+1" text particles (represented as glow orbs)
+  for (let i = 0; i < 5; i++) {
+    const life = randInt(40, 60);
+    ps.addParticle({
+      x: x / TILE_SIZE + rand(-0.3, 0.3),
+      y: y / TILE_SIZE - 0.3,
+      vx: rand(-0.1, 0.1),
+      vy: rand(-0.5, -0.2),
+      life,
+      maxLife: life,
+      size: rand(4, 7),
+      color: "#fbbf24",
+      alpha: rand(0.3, 0.5),
+      alphaDecay: rand(0.003, 0.008),
+      sizeDecay: rand(0.005, 0.015),
+      gravity: -0.01,
+      type: "glow",
+    });
+  }
+}
+
+/** Combo hit — rapid directional particles with impact flash */
+export function emitCombo(
+  ps: ParticleSystem,
+  x: number,
+  y: number,
+  comboCount: number
+): void {
+  const count = Math.min(6 + comboCount * 3, 30);
+  const accentColors = ["#ff5252", "#ff1744", "#ff8a65", "#ffab40", "#ffd740"];
+
+  for (let i = 0; i < count; i++) {
+    const angle = rand(0, Math.PI * 2);
+    const speed = rand(1, 4 + comboCount * 0.3);
+    const life = randInt(8, 18);
+
+    ps.addParticle({
+      x: x / TILE_SIZE + rand(-0.15, 0.15),
+      y: y / TILE_SIZE + rand(-0.15, 0.15),
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life,
+      maxLife: life,
+      size: rand(2, 4 + comboCount * 0.2),
+      color: accentColors[i % accentColors.length],
+      alpha: rand(0.7, 1),
+      alphaDecay: rand(0.04, 0.1),
+      sizeDecay: rand(0.1, 0.25),
+      gravity: 0,
+      type: "combo",
+    });
+  }
+
+  // Center flash
+  const life = randInt(5, 10);
+  ps.addParticle({
+    x: x / TILE_SIZE,
+    y: y / TILE_SIZE,
+    vx: 0,
+    vy: -0.2,
+    life,
+    maxLife: life,
+    size: rand(6, 12 + comboCount * 2),
+    color: "#ffffff",
+    alpha: rand(0.6, 0.9),
+    alphaDecay: rand(0.06, 0.12),
+    sizeDecay: rand(0.08, 0.15),
+    gravity: 0,
+    type: "glow",
+  });
+}
+
+/** Evolution ring — expanding magical circle with sparkles */
+export function emitEvolutionRing(
+  ps: ParticleSystem,
+  x: number,
+  y: number,
+  color: string
+): void {
+  const accents = ["#ffffff", "#fbbf24", color, "#e040fb", "#00e5ff"];
+
+  // Expanding ring particles
+  for (let i = 0; i < 40; i++) {
+    const angle = (i / 40) * Math.PI * 2;
+    const speed = rand(0.3, 0.8);
+    const life = randInt(40, 70);
+
+    ps.addParticle({
+      x: x / TILE_SIZE + Math.cos(angle) * rand(0.1, 0.2),
+      y: y / TILE_SIZE + Math.sin(angle) * rand(0.1, 0.2),
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life,
+      maxLife: life,
+      size: rand(2, 4),
+      color: accents[i % accents.length],
+      alpha: rand(0.7, 1),
+      alphaDecay: rand(0.005, 0.015),
+      sizeDecay: rand(0.01, 0.03),
+      gravity: 0,
+      type: "evolutionRing",
+    });
+  }
+
+  // Inner light core
+  const life = randInt(50, 80);
+  ps.addParticle({
+    x: x / TILE_SIZE,
+    y: y / TILE_SIZE,
+    vx: 0,
+    vy: 0,
+    life,
+    maxLife: life,
+    size: rand(5, 8),
+    color: "#ffffff",
+    alpha: rand(0.4, 0.7),
+    alphaDecay: rand(0.003, 0.008),
+    sizeDecay: rand(0.01, 0.02),
+    gravity: 0,
+    type: "glow",
+  });
+
+  // Upward floating sparkles
+  for (let i = 0; i < 10; i++) {
+    const l = randInt(20, 40);
+    ps.addParticle({
+      x: x / TILE_SIZE + rand(-0.5, 0.5),
+      y: y / TILE_SIZE,
+      vx: rand(-0.3, 0.3),
+      vy: rand(-2, -0.5),
+      life: l,
+      maxLife: l,
+      size: rand(1, 3),
+      color: accents[randInt(0, accents.length - 1)],
+      alpha: rand(0.5, 0.8),
+      alphaDecay: rand(0.015, 0.03),
+      sizeDecay: rand(0.02, 0.04),
+      gravity: -0.03,
+      type: "sparkle",
+    });
+  }
+}
+
+/** Crystal energy pulse — expanding cyan wave */
+export function emitCrystalPulse(
+  ps: ParticleSystem,
+  x: number,
+  y: number
+): void {
+  for (let ring = 0; ring < 2; ring++) {
+    const ringOffset = ring * 15;
+    for (let i = 0; i < 20; i++) {
+      const angle = (i / 20) * Math.PI * 2;
+      const speed = rand(0.8, 1.5);
+      const life = randInt(25, 45) + ringOffset;
+
+      ps.addParticle({
+        x: x / TILE_SIZE + Math.cos(angle) * rand(0.1, 0.2),
+        y: y / TILE_SIZE + Math.sin(angle) * rand(0.1, 0.2),
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life,
+        maxLife: life,
+        size: rand(2, 4),
+        color: ring === 0 ? "#00e5ff" : "#18ffff",
+        alpha: rand(0.4, 0.7),
+        alphaDecay: rand(0.005, 0.015),
+        sizeDecay: rand(0.01, 0.03),
+        gravity: 0,
+        type: "crystalPulse",
+      });
+    }
+  }
+}
+
+/** Resource collection sparkle burst */
+export function emitResourceCollect(
+  ps: ParticleSystem,
+  x: number,
+  y: number,
+  resourceType: string
+): void {
+  const colorMap: Record<string, string[]> = {
+    mushroom: ["#8d6e63", "#a1887f", "#ffb74d", "#8d6e63"],
+    crystal_shard: ["#00e5ff", "#18ffff", "#00bcd4", "#ffffff"],
+    bone: ["#e0e0e0", "#f5f5f5", "#bdbdbd", "#e0e0e0"],
+    mana_orb: ["#e040fb", "#ce93d8", "#f3e5f5", "#ab47bc"],
+    moss: ["#7cb342", "#8bc34a", "#aed581", "#c5e1a5"],
+  };
+  const colors = colorMap[resourceType] ?? ["#ffffff", "#f5f5f5"];
+  const count = randInt(8, 14);
+
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2 + rand(-0.15, 0.15);
+    const speed = rand(0.5, 2);
+    const life = randInt(10, 25);
+
+    ps.addParticle({
+      x: x / TILE_SIZE + rand(-0.1, 0.1),
+      y: y / TILE_SIZE + rand(-0.1, 0.1),
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - rand(0.5, 1.5),
+      life,
+      maxLife: life,
+      size: rand(1.5, 3.5),
+      color: colors[i % colors.length],
+      alpha: rand(0.6, 0.9),
+      alphaDecay: rand(0.025, 0.05),
+      sizeDecay: rand(0.03, 0.08),
+      gravity: 0.04,
+      type: "sparkle",
+    });
+  }
+}
+
+/** Screen flash — white overlay particle for impact feedback */
+export function emitScreenFlash(
+  ps: ParticleSystem,
+  _x: number,
+  _y: number,
+  color: string = "#ffffff",
+  duration: number = 6
+): void {
+  // Just add a particle - the flash logic is handled in the render loop
+  ps.addParticle({
+    x: 0,
+    y: 0,
+    vx: 0,
+    vy: 0,
+    life: duration,
+    maxLife: duration,
+    size: 0, // signal for screen flash
+    color,
+    alpha: 0.4,
+    alphaDecay: 0,
+    sizeDecay: 0,
+    gravity: 0,
+    type: "screenFlash",
+  });
 }

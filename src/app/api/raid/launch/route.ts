@@ -144,11 +144,6 @@ export async function POST(request: NextRequest) {
     `)
     .in("pet_id", pet_ids);
 
-  // Mark pets as raiding
-  await serviceSupabase
-    .from("pets")
-    .update({ status: "raiding" })
-    .in("id", pet_ids);
 
   // Generate random seed
   const seed = Math.floor(Math.random() * 2147483647);
@@ -254,6 +249,12 @@ export async function POST(request: NextRequest) {
     simResult = simulateRaid(defenderTiles as RaidTile[], raidPets, seed);
   }
 
+
+  // Mark pets as raiding (only after simulation succeeds)
+  await serviceSupabase
+    .from("pets")
+    .update({ status: "raiding" })
+    .in("id", pet_ids);
   // Handle dead pets — mark them dead
   for (const petId of simResult.dead_pet_ids) {
     const deadPet = attackPets.find((p) => p.id === petId);
